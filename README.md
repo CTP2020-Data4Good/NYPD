@@ -5,3 +5,5 @@
 - Create Anaconda environment using **spec-file.txt**
 
         `conda create -name myenv --file spec-file.txt`
+- Activate new conda environment 
+        `conda activate myenv`
