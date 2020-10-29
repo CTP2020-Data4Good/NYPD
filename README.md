@@ -6,4 +6,5 @@
 
         `conda create -name myenv --file spec-file.txt`
 - Activate new conda environment 
+
         `conda activate myenv`
