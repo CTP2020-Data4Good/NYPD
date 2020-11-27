@@ -158,7 +158,7 @@ def hide_container(fn, ln):
 )
 def update_figure(category):
     # Group by year, borough, precinct
-    df_cat = df_full
+    df_cat = df_full[df_full.year_received > 1986]
     if (category != 'all'):
         # If user specified complaint type filter for that type
         df_cat = df_full[df_full['fado_type'] == category]
