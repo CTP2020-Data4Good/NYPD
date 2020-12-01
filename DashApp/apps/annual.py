@@ -28,41 +28,58 @@ df_full = df_full[df_full.year_received < 2020]
 
 # Set mapbox key
 # Access mapbox api using mapbox access token
-with open("./mapbox_token", 'r') as f:
+with open("../mapbox_token", 'r') as f:
     mapbox_key = f.read().strip()
 
+# Create General Layout format to reuse
+margins = {'l': 30, 'r': 30, 't': 20, 'b': 20}
+legend_title = {'text': ''}
+# fig.update_layout(margin = margins)
+legend_details = {'orientation': 'h',
+                  'bgcolor': 'rgb(246, 246, 244)', 'x': 0.3, 'title': legend_title}
+# fig.update_layout(legend=legend_details)
+# paper_bgcolor='rgb(25, 26, 26)'
+general_layout = go.Layout(template='seaborn', plot_bgcolor='rgba(0,0,0,0)',
+                           margin=margins, paper_bgcolor='rgb(246, 246, 244)', legend=legend_details)
+
 layout = html.Div([
-    # Drop down menu to select options for animated map
-    dbc.Row(
-        dbc.Col(
-            dcc.Dropdown(
-                id='map_data_category',
-                options=[
-                    {'label': 'All Complaints', 'value': 'all'},
-                    {'label': 'Abuse of Authority Complaints',
-                        'value': 'Abuse of Authority'},
-                    {'label': 'Discourtesy Complaints', 'value': 'Discourtesy'},
-                    {'label': 'Use of Force Complaints', 'value': 'Force'},
-                    {'label': 'Offensive Language Complaints',
-                        'value': 'Offensive Language'}
-                ],
-                value='all'
-            ),
-            width={'size': 4, 'offset': 1},
-        ),
-    ),
-    dbc.Row(
-        dbc.Col(
+    dbc.Row([dbc.Col(
             dcc.Graph(id='animated_annual_map'),
-            width={'size': 8, 'offset': 1},
+            width={'size': 7, 'offset': 1},
+            className='object-container'),
+        dbc.Col(
+        dbc.FormGroup(
+            [
+                # dbc.Label("Choose a bunch"),
+                dbc.Checklist(
+                    options=[
+                        {'label': 'Abuse of Authority Complaints',
+                         'value': 'Abuse of Authority'},
+                        {'label': 'Discourtesy Complaints',
+                         'value': 'Discourtesy'},
+                        {'label': 'Use of Force Complaints',
+                         'value': 'Force'},
+                        {'label': 'Offensive Language Complaints',
+                         'value': 'Offensive Language'},
+                    ],
+                    value=['Abuse of Authority', 'Discourtesy',
+                           'Force', 'Offensive Language'],
+                    id="map-input",
+                    switch=True,
+                ),
+            ]
         ),
-        className='jumbotron'
-    ),
+        id='map-input-container',
+        width={'size': 2},
+        className='object-container',
+    )
+    ]),
     dbc.Row([
         dbc.Col(
             # Graphs chosen
             dcc.Graph(id='user_selected_bar_graph'),
-            width={'size': 5, 'offset': 1},
+            width={'size': 6, 'offset': 1},
+            className='object-container'
         ),
         dbc.Col([
             dbc.Row(
@@ -79,7 +96,7 @@ layout = html.Div([
                         ],
                         value='totals'
                     ),
-                    width={'size': 6, 'offset': 1}
+                    # width={'size': 2, 'offset': 1}
                 )
 
             ),
@@ -94,12 +111,13 @@ layout = html.Div([
                                 "Enter the year you want data for..."),
                         ]
                     ),
-                    width={'size': 6, 'offset': 1}
+                    # width={'size': 2, 'offset': 1}
                 )
 
             ),
         ],
-            width={'size': 5, 'offset': 1},
+            width={'size': 3},
+            className='object-container'
         ),
     ]
     ),
@@ -154,14 +172,13 @@ def hide_container(fn, ln):
 
 @ app.callback(
     Output('animated_annual_map', 'figure'),
-    [Input('map_data_category', 'value')]
+    [Input('map-input', 'value')]
 )
-def update_figure(category):
+def update_figure(categories):
     # Group by year, borough, precinct
     df_cat = df_full[df_full.year_received > 1986]
-    if (category != 'all'):
-        # If user specified complaint type filter for that type
-        df_cat = df_full[df_full['fado_type'] == category]
+    # filter dataframe based on selected categories
+    df_cat = df_cat[df_full['fado_type'].isin(categories)]
     precinct_grp = df_cat.groupby(by=['year_received', 'borough',
                                       'precinct', 'long', 'lat', 'fado_type'],).size()
     # Get dataframe from groupby object
@@ -187,7 +204,16 @@ def update_figure(category):
                             animation_frame='year_received', color='fado_type', zoom=8.5,)
     fig.update_layout(mapbox_style="light",
                       mapbox_accesstoken=mapbox_key)
-    fig.layout.template = 'plotly'
+    fig.layout.template = 'seaborn'
+    fig.layout.paper_bgcolor = 'rgb(246, 246, 244)'
+    # 'rgb(202, 210, 211)'
+    margins = {'l': 10, 'r': 10, 't': 20, 'b': 0}
+    legend_title = {'text': ''}
+    fig.update_layout(margin=margins)
+    # 'bgcolor': 'rgb(52, 51, 50)' legend
+    legend_details = {'orientation': 'h',  'x': 0.4,
+                      'bgcolor': 'rgb(246, 246, 244)', 'title': legend_title}
+    fig.update_layout(legend=legend_details)
 
     return fig
 
@@ -245,7 +271,7 @@ def update_figure(selected_year, selection):
                               go.Bar(name="Officer Gender", x=filtered_df['mos_gender'],
                                      y=filtered_df["mos_gender_count"])
                               ])
-        fig.update_layout(barmode='group')
+        # fig.update_layout(barmode='group')
     else:
         # Callback for ethnicity distribution for selected year
         # Get data for selected year
@@ -274,7 +300,9 @@ def update_figure(selected_year, selection):
                               go.Bar(name="Officer Ethnicity", x=filtered_df['mos_ethnicity'],
                                      y=filtered_df["mos_eth_count"])
                               ])
-        fig.update_layout(barmode='group')
+
+    fig.layout = general_layout
+    fig.update_layout(barmode='group')
 
     return fig
 

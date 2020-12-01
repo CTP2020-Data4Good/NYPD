@@ -26,32 +26,36 @@ app.layout = html.Div([
                                                         dcc.Link(
                                                             'NYPD Complaints By Year', className='nav-link', href='/apps/annual'), className='nav-item',),
                                                     html.Li(dcc.Link(
-                                                        'Machine Learning Model', className='nav-link', href='/apps/predictions', ), className='nav-item')
-
+                                                        'Machine Learning Model', className='nav-link', href='/apps/predictions', ), className='nav-item'),
+                                                    html.Li(dcc.Link(
+                                                        'About', className='nav-link', href='/apps/about',),
+                                                        className='nav-item'
+                                                    )
                                                 ]
 
                                                 )
                                     ])]
                  ),
     ],),
-    html.Div(className="jumpotron",
-             children=[
-                 html.H1('Welcome!'),
-                 html.P('This is our welcome message and explaination',
-                        className='lead'),
-                 html.P(className='lead',
-                        children=[dcc.Link('NYPD Complaints By Year', className='btn btn-primary btn-lg',
-                                           href='/apps/annual'),
-                                  dcc.Link('Machine Learning Model', className='btn btn-primary btn-lg', href='/apps/predictions', )]
-                        )
-             ]
-             ),
     # When link is clicked, the href value populates pathname param here
     dcc.Location(id='url', refresh=False, pathname=''),
     # App pages will be returned to go inside that list
     html.Div(id='page-content', children=[]),
     html.Br(),
 ])
+
+home_layout = html.Div(id='home_layout', className="jumpotron",
+                       children=[
+                           html.H1('Welcome!'),
+                           html.P('This is our welcome message and explaination',
+                                  className='lead'),
+                           html.P(className='lead',
+                                  children=[dcc.Link('NYPD Complaints By Year', className='btn btn-primary btn-lg',
+                                                     href='/apps/annual'),
+                                            dcc.Link('Machine Learning Model', className='btn btn-primary btn-lg', href='/apps/predictions', )]
+                                  )
+                       ]
+                       )
 
 
 @app.callback(
@@ -61,10 +65,12 @@ app.layout = html.Div([
 def display_page(pathname):
     if pathname == '/apps/annual':
         return annual.layout
-    if pathname == '/apps/predictions':
+    elif pathname == '/apps/predictions':
         return predictions.layout
+    # elif pathname == '/apps/about':
+    #     return about.layout
     else:
-        return "404"
+        return home_layout
 
 
 if __name__ == '__main__':
