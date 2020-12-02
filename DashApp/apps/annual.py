@@ -1,3 +1,4 @@
+from logging import PlaceHolder, disable
 from dash_bootstrap_components._components.DropdownMenu import DropdownMenu
 from dash_bootstrap_components._components.DropdownMenuItem import DropdownMenuItem
 import dash_core_components as dcc
@@ -82,93 +83,316 @@ layout = html.Div([
             className='object-container'
         ),
         dbc.Col([
-            dbc.Row(
-                dbc.Col(
-                    # Bar Graph selector dropdown
-                    dcc.Dropdown(
-                        id='bar_graph_selector',
-                        options=[
-                            {'label': 'Year Totals', 'value': 'totals'},
-                            {'label': 'Complainant and Officer Genders',
-                             'value': 'genders'},
-                            {'label': 'Complainant and Officer Ethnicities',
-                                'value': 'ethnicities'}
-                        ],
-                        value='totals'
-                    ),
-                    # width={'size': 2, 'offset': 1}
-                )
-
-            ),
+            # Select year for visualizations
             dbc.Row(
                 dbc.Col(
                     dbc.FormGroup(
                         [
-                            dbc.Label("Year"),
-                            dbc.Input(id="year-input", type='number',
-                                      value=1989, list=list(range(1989, 2020))),
-                            dbc.FormText(
-                                "Enter the year you want data for..."),
+                            html.Div(
+                                [
+                                    dbc.Input(type="number", list=list(range(
+                                        1989, 2020)), min=1989, max=2020, id="year-input", value=None, placeholder='Enter year...'),
+                                ],
+                                className='input-element'
+
+                            )
                         ]
                     ),
+                )
+
+            ),
+            dbc.Row(
+                dbc.Col(
+                    # Filterning options (filter by borough or by precinct)
+                    dbc.FormGroup(
+                        [
+                            # dbc.Label("Choose Filter"),
+                            dbc.RadioItems(
+                                options=[
+                                    {'label': 'All data', 'value': None},
+                                    {"label": "Filter by Precinct",
+                                        "value": 'precinct'},
+                                    {"label": "Filter by Borough",
+                                        "value": 'borough'},
+                                    # {"label": "Filter by Zip Code",
+                                    #     "value": 'zc'},
+                                ],
+                                value=None,
+                                id="graphs-filter",
+                                inline=True,
+                                className='input-element',
+
+                            ),
+                        ],
+                    )
                     # width={'size': 2, 'offset': 1}
                 )
 
             ),
+            dbc.Row(
+                dbc.Col(
+                    # Select Precinct input
+                    html.Div(
+                        [
+                            dbc.Input(type="number", list=list(
+                                range(int(df_full['precinct'].min()), int(df_full['precinct'].max()))), step=1, max=int(df_full['precinct'].max()), min=int(df_full['precinct'].min()), disabled=True, placeholder='Enter Precinct...', id="precinct-input",),
+                        ],
+                        className='input-element'
+
+                    )
+                )
+
+            ),
+            dbc.Row(
+                dbc.Col(
+                    html.Div(
+                        # Select Borough Menu
+                        [dbc.Select(
+                            options=[
+                                {"label": "Brooklyn", "value": 'Brooklyn'},
+                                {"label": "Bronx", "value": 'Bronx'},
+                                {"label": "Manhattan", "Value": "Manhattan"},
+                                {"label": "Queens", "Value": "Queens"},
+                                {"label": "Staten Island",
+                                    "Value": "Staten Island"}
+                            ],
+                            placeholder="Select Borough...",
+                            id="boro-selection",
+                            disabled=True,
+                            className='form-control',
+
+                        )],
+                        className='input-element select'
+                    ),
+
+                )
+
+            ),
+            dbc.Row(
+                dbc.Col(
+                    # Graph Selection
+                    dbc.FormGroup(
+                        [
+                            dbc.RadioItems(
+                                options=[
+                                    {'label': 'Complaint Totals',
+                                        'value': 'totals'},
+                                    {'label': 'Complainant and Officer Genders',
+                                        'value': 'genders'},
+                                    {'label': 'Complainant and Officer Ethnicities',
+                                     'value': 'ethnicities'}
+                                ],
+                                value='totals',
+                                id="bar_graph_selector",
+                                inline=False,
+
+                            ),
+                        ],
+                        className='input-element',
+                    )
+                )
+
+            ),
+
         ],
             width={'size': 3},
             className='object-container'
         ),
     ]
     ),
-    # Will base multiple figures on this input slider
-    # Slider year selector
-    html.Br(),
 
-    html.Div(id='officer_info_div', children=[
-        html.H6('Enter officer name OR Badge Number'),
-        html.Div(["Officer First Name: ",
-                  dcc.Input(id='officer_fn',
-                            value=None, type='text'),
-                  " Last Name: ",
-                  dcc.Input(id='officer_ln',
-                            value=None, type='text'),
-                  ]),
-        html.Br(),
-        html.Div(
-            id='officer_figs_container', children=[
-                dcc.Graph(id='officer_data_table'),
-                dcc.Graph(id='officer_data_graph')
-            ],
+    html.Br(),
+    html.Div(id='officer_info_input_div', children=[
+        dbc.Row([
+            # Officer Info input
+            dbc.Col(
+
+                dbc.FormGroup(
+                    [
+                        dbc.Input(placeholder='Officer First Name', id='officer_fn',
+                                  value=None, type='text', className='input-element'),
+
+                    ],
+                ),
+                width=3,
+            ),
+            dbc.Col(
+                dbc.FormGroup(
+                    [
+                        dbc.Input(placeholder='Officer Last Name', id='officer_ln',
+                                  value=None, type='text', className='input-element'),
+                    ],
+                ),
+                width=3
+            ),
+            dbc.Col(
+                dbc.FormGroup(
+                    [
+                        dbc.RadioItems(
+                            options=[
+                                {'label': 'Complaint Types by Year',
+                                 'value': 'complaint_types_annual'},
+                                {"label": 'Complainant Ethnicities by Year',
+                                 "value": 'ethnicities_annual'},
+                                {"label": "Ethnicities of Complainants Overall",
+                                 "value": 'ethnicities'},
+                                {"label": "Civilian Complaint Review Board Rulings",
+                                 "value": 'ccrb'},
+
+                                # {"label": "Filter by Zip Code",
+                                #     "value": 'zc'},
+                            ],
+                            value='complaint_types_annual',
+                            id="officer-graphs-filter",
+                            inline=True,
+                            className='input-element',
+
+                        ),
+                    ],
+                )
+
+            )
+        ]
+            # width={'size': 2, 'offset': 1}
+
+
         ),
-    ])
+    ],
+        className='object-container'),
+    html.Div(id='officer_figs_container',
+             children=[
+                 dbc.Row([
+
+                     dbc.Col(
+                         dcc.Graph(id='officer_data_table'),
+                         width={'size': 4},
+                         className='object-container'
+                     ),
+                     dbc.Col(
+                         dcc.Graph(id='officer_data_graph'),
+                         width={'size': 7},
+                         className='object-container'
+                     )
+                 ],
+
+                 )
+             ]
+
+             )
+
+
 ]
 )
+# Callback for displaying officer info graphs
 
-# Callback to hide figure containers for officer info until input is given
+
+@app.callback(
+    Output('officer_data_graph', 'figure'),
+    [Input('officer_fn', 'value'), Input(
+        'officer_ln', 'value'), Input('officer-graphs-filter', 'value')]
+)
+def update_figure(first, last, filter):
+    # Filter dataframe for officer data
+    condition1 = df_full.first_name == first.capitalize()
+    condition2 = df_full.last_name == last.capitalize()
+    df_officer = df_full[condition1 & condition2]
+    # Todo return alert that there is no one with that name in the datafram if df_officer is empty
+
+    if filter == 'ethnicities':
+        officer_ethnicity_grp = df_officer.groupby(
+            ['complainant_ethnicity']).size()
+        officer_ethnicity_grp = officer_ethnicity_grp.reset_index()
+        officer_ethnicity_grp.rename(columns={0: '#_complaints'}, inplace=True)
+        labels = list(officer_ethnicity_grp.complainant_ethnicity)
+        values = list(officer_ethnicity_grp['#_complaints'])
+        fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.3,
+                                     title='Ethnicities of Complainants for Selected Officer', titleposition='top center')])
+    elif filter == 'ccrb':
+        # Group by year, borough, and get count
+        officer_ethnicity_outcome_grp = df_officer.groupby(
+            by=['complainant_ethnicity', 'unsubstantiated/exonerated'],).size()
+        # get dataframe from groupby object
+        officer_ethnicity_outcome_grp = officer_ethnicity_outcome_grp.reset_index()
+        # Change name of size(count) column to #_complaints
+        officer_ethnicity_outcome_grp.rename(
+            columns={0: '#_complaints'}, inplace=True)
+        # Change text to clarify for user
+        condition = officer_ethnicity_outcome_grp['unsubstantiated/exonerated'] == True
+        condition2 = officer_ethnicity_outcome_grp['unsubstantiated/exonerated'] == False
+        officer_ethnicity_outcome_grp['unsubstantiated/exonerated'].where(
+            condition, 'Substantiated', inplace=True)
+        officer_ethnicity_outcome_grp['unsubstantiated/exonerated'].where(
+            condition2, 'Unsubstantiated/Exonerated', inplace=True)
+        # Create figure
+        labels = {'unsubstantiated/exonerated': 'Civilian Complaint Review Board Ruling',
+                  '#_complaints': 'No. of Complaints', 'complainant_ethnicity': 'Complainant Ethnicity'}
+        fig = px.bar(officer_ethnicity_outcome_grp, x="complainant_ethnicity", y="#_complaints",
+                     color="unsubstantiated/exonerated", barmode="group",
+                     labels=labels)
+    elif filter == 'complaint_types_annual':
+        # Group by year, borough, and get count
+        officer_year_comptype_grp = df_officer.groupby(
+            by=['year_received', 'fado_type'],).size()
+        # get dataframe from groupby object
+        officer_year_comptype_grp = officer_year_comptype_grp.reset_index()
+        # Change name of size(count) column to #_complaints
+        officer_year_comptype_grp.rename(
+            columns={0: '#_complaints'}, inplace=True)
+        # Create and show line plot
+        fig = px.scatter(officer_year_comptype_grp, x="year_received",
+                         y="#_complaints", color="fado_type", size='#_complaints')
+    elif filter == 'ethnicities_annual':
+        # Group by year, borough, and get count
+        officer_year_ethnicity_grp = df_officer.groupby(
+            by=['year_received', 'complainant_ethnicity'],).size()
+        # get dataframe from groupby object
+        officer_year_ethnicity_grp = officer_year_ethnicity_grp.reset_index()
+        # Change name of size(count) column to #_complaints
+        officer_year_ethnicity_grp.rename(
+            columns={0: '#_complaints'}, inplace=True)
+        # Create and show line plot
+        fig = px.scatter(officer_year_ethnicity_grp, x="year_received",
+                         y="#_complaints", color="complainant_ethnicity", size='#_complaints')
+
+    fig.layout = general_layout
+    return fig
+
+
+# Callback for displaying officer info in a table
 
 
 @ app.callback(
-    Output('officer_figs_container', 'style'),
+    Output('officer_data_table', 'figure'),
     [Input('officer_fn', 'value'), Input(
         'officer_ln', 'value')]
 )
-def hide_container(fn, ln):
-    if fn is not None and ln is not None:
-        return {'display': 'block'}
-    else:
-        return {'display': 'none'}
+def update_figure(first, last):
+    # Filter dataframe for officer data
+    condition1 = df_full.first_name == first.capitalize()
+    condition2 = df_full.last_name == last.capitalize()
+    df_officer = df_full[condition1 & condition2]
+    # Create table with general data about officer
+    # Group by year, fado_type, and get count
+    officer_year_comptype_grp = df_officer.groupby(
+        by=['year_received', 'fado_type'],).size()
+    # get dataframe from groupby object
+    officer_year_comptype_grp = officer_year_comptype_grp.reset_index()
+    # Change name of size(count) column to #_complaints
+    officer_year_comptype_grp.rename(columns={0: '#_complaints'}, inplace=True)
+    # Create table with the data and return figure
+    fig = go.Figure(data=[go.Table(
+        header=dict(values=['Year', 'Complaint Type', "No. Complaints"],
+                    align='left'),
+        cells=dict(values=[officer_year_comptype_grp.year_received, officer_year_comptype_grp.fado_type,
+                           officer_year_comptype_grp['#_complaints']],
+                   fill_color='lavender',
+                   align='left'),
+        columnwidth=[2, 4, 2]
+    )
+    ])
+    fig.layout = general_layout
+    return fig
 
-
-# Callback for displaying officer info
-# @ app.callback(
-#     Output('officer_data_table', 'figure'),
-#     [Input('officer_fn', 'value'), Input(
-#         'officer_ln', 'value'), Input('officer_bn', 'value')]
-# )
-# def update_figure(fn, ln, bn):
-#     # ToDo code to render table of Officer info
-#     # Callback for map by year
 
 @ app.callback(
     Output('animated_annual_map', 'figure'),
@@ -222,31 +446,54 @@ def update_figure(categories):
 
 @ app.callback(
     Output('user_selected_bar_graph', 'figure'),
-    [Input('year-input', 'value'), Input('bar_graph_selector', 'value')]
+    [Input('year-input', 'value'), Input('graphs-filter', 'value'), Input('bar_graph_selector', 'value'),
+     Input('boro-selection', 'value'), Input('precinct-input', 'value')]
 )
-def update_figure(selected_year, selection):
+def update_figure(selected_year,  filter, selection, boro, precinct):
+    # Determin filter
+    if filter == 'precinct':
+        df_tmp = df_full[df_full.precinct == precinct]
+    elif filter == 'boro':
+        df_tmp = df_full[df_full.borough == boro]
+    else:
+        df_tmp = df_full
+
     if selection == 'totals':
         # Callback for complaint type numbers by year bar graph
-        filtered_df = df_annual_ttls[df_annual_ttls.year_received == selected_year]
-        # Drop unsubstantiated_or_exnrtd since it's not relevant to this graph
-        filtered_df.drop(['unsubstantiated_or_exnrtd',
-                          'substantiated_(any)'], axis=1, inplace=True)
-        # Drop year since we don't want it in this visualization, it's assumed from input
-        filtered_df.drop('year_received', axis=1, inplace=True)
-        # Transpose so we don't have to work with wideform df
-        filtered_df = filtered_df.T
-        # Reset index
-        filtered_df.reset_index(inplace=True)
-        # Name our columns so we can reference them easily when creating figure
-        filtered_df.columns = ['fado_type', 'total']
-        # Sort the df by total
-        filtered_df.sort_values('total', ascending=False, inplace=True)
-        # Build the visualization, using this filtered_df
-        fig = px.bar(filtered_df, x='fado_type', y='total', )
+        if selected_year == None:
+            filtered_df = df_annual_ttls
+            filtered_df = df_annual_ttls.drop(
+                ['unsubstantiated_or_exnrtd', 'substantiated_(any)', 'year_received'], axis=1)
+            filtered_df = pd.DataFrame(filtered_df.sum())
+            filtered_df.reset_index(inplace=True)
+            filtered_df.columns = ['fado_type', 'total']
+            filtered_df.sort_values('total', ascending=False, inplace=True)
+            fig = px.bar(filtered_df, x='fado_type', y='total', )
+
+        else:
+            filtered_df = df_annual_ttls[df_annual_ttls.year_received == selected_year]
+            # Drop unsubstantiated_or_exnrtd since it's not relevant to this graph
+            filtered_df.drop(['unsubstantiated_or_exnrtd',
+                              'substantiated_(any)'], axis=1, inplace=True)
+            # Drop year since we don't want it in this visualization, it's assumed from input
+            filtered_df.drop('year_received', axis=1, inplace=True)
+            # Transpose so we don't have to work with wideform df
+            filtered_df = filtered_df.T
+            # Reset index
+            filtered_df.reset_index(inplace=True)
+            # Name our columns so we can reference them easily when creating figure
+            filtered_df.columns = ['fado_type', 'total']
+            # Sort the df by total
+            filtered_df.sort_values('total', ascending=False, inplace=True)
+            # Build the visualization, using this filtered_df
+            fig = px.bar(filtered_df, x='fado_type', y='total', )
     elif selection == 'genders':
         # Callback for gender distribution for selected year
         # Get data for selected year
-        filtered_df = df_full[df_full['year_received'] == selected_year]
+        if selected_year == None:
+            filtered_df = df_tmp
+        else:
+            filtered_df = df_tmp[df_tmp['year_received'] == selected_year]
         # Fill null values with "unknown"
         filtered_df['complainant_gender'].fillna('Unknown', inplace=True)
         filtered_df['mos_gender'].fillna('Unknown', inplace=True)
@@ -272,10 +519,13 @@ def update_figure(selected_year, selection):
                                      y=filtered_df["mos_gender_count"])
                               ])
         # fig.update_layout(barmode='group')
-    else:
+    elif selection == 'ethnicities':
         # Callback for ethnicity distribution for selected year
         # Get data for selected year
-        filtered_df = df_full[df_full['year_received'] == selected_year]
+        if selected_year == None:
+            filtered_df = df_tmp
+        else:
+            filtered_df = df_tmp[df_tmp['year_received'] == selected_year]
         # Fill null values with "unknown"
         filtered_df['complainant_ethnicity'].fillna('Unknown', inplace=True)
         filtered_df['mos_ethnicity'].fillna('Unknown', inplace=True)
@@ -305,6 +555,47 @@ def update_figure(selected_year, selection):
     fig.update_layout(barmode='group')
 
     return fig
+
+### Callback for layout and visual adjustments######
+# Callback to disable precinct input unless precinct filtering is selected
+
+
+@app.callback(
+    Output('precinct-input', 'disabled'),
+    [Input('graphs-filter', 'value')]
+)
+def adjust_input(filter):
+    if filter == 'precinct':
+        return False
+    else:
+        return True
+
+# Callback to disable borough input unless borough filtering is selected
+
+
+@app.callback(
+    Output('boro-selection', 'disabled'),
+    [Input('graphs-filter', 'value')]
+)
+def adjust_input(filter):
+    if filter == 'borough':
+        return False
+    else:
+        return True
+
+ # Callback to hide figure containers for officer info until input is given
+
+
+@ app.callback(
+    Output('officer_figs_container', 'style'),
+    [Input('officer_fn', 'value'), Input(
+        'officer_ln', 'value')]
+)
+def hide_container(fn, ln):
+    if fn is not None and ln is not None:
+        return {'display': 'block'}
+    else:
+        return {'display': 'none'}
 
 
 # app.layout = html.Div([

@@ -38,6 +38,49 @@
   padding: 20px;
 }
 
+.input-element {
+  margin: 6px;
+}
+
+#boro-selection {
+  height: 38px;
+  padding: 6px 10px;
+  background-color: #fff;
+  border: 1px solid #d1d1d1;
+  border-radius: 4px;
+  box-shadow: none;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+#boro-selection:disabled{ 
+  background-color: #ecf0f1;
+  opacity: 1;
+}
+#graphs-filter, #bar_graph_selector { 
+  padding-left: 5px; 
+}
+
+#bar_graph_selector { 
+  padding-top: 5px; 
+}
+/* #boro-selection {
+  display: block;
+  width: 100%;
+  height: calc(1.5em + 0.75rem + 2px);
+  padding: 0.375rem 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #7b8a8b;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+} */
+
 .object-container {
   background-color: rgb(246, 246, 244);
   padding: 20px;
@@ -47,10 +90,6 @@
 }
 
 /* End OUR OWN STYLING CHANGES*/
-
-
-
-
 
 @import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap");
 :root {
@@ -112,8 +151,6 @@ nav,
 section {
   display: block;
 }
-
-
 
 body {
   margin: 0;
