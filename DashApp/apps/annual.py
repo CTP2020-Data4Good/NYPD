@@ -29,7 +29,7 @@ df_full = df_full[df_full.year_received < 2020]
 
 # Set mapbox key
 # Access mapbox api using mapbox access token
-with open("../mapbox_token", 'r') as f:
+with open("./mapbox_token", 'r') as f:
     mapbox_key = f.read().strip()
 
 # Create General Layout format to reuse
@@ -51,6 +51,19 @@ layout = html.Div([
         dbc.Col(
         dbc.FormGroup(
             [
+                dbc.Select(
+                    options=[
+                        {"label": "Types of complaints",
+                         "value": 'complaint_types'},
+                        {"label": "Complainant Ethnicity", "value": 'ethnicity'},
+                        {"label": "Complainant Gender", "value": "gender"},
+                    ],
+                    placeholder="Select visualization...",
+                    id="map-filter",
+                    className='form-control input-element',
+                    value='complaint_types',
+
+                ),
                 # dbc.Label("Choose a bunch"),
                 dbc.Checklist(
                     options=[
@@ -67,11 +80,51 @@ layout = html.Div([
                            'Force', 'Offensive Language'],
                     id="map-input",
                     switch=True,
+                    className='input-element'
+                ),
+                dbc.Checklist(
+                    options=[
+                        {'label': 'Black',
+                         'value': 'Black'},
+                        {'label': 'Hispanic',
+                         'value': 'Hispanic'},
+                        {'label': 'White',
+                         'value': 'White'},
+                        {'label': 'Other Race',
+                         'value': 'Other Race'},
+                    ],
+                    value=['Black', 'Hispanic',
+                           'White', 'Other Race'],
+                    id="map-ethnicity",
+                    switch=True,
+                    inline=True,
+                    className='input-element'
+                ),
+                dbc.Checklist(
+                    options=[
+                        {'label': 'Male',
+                         'value': 'Male'},
+                        {'label': 'Female',
+                         'value': 'Female'},
+                        {'label': 'Unknown',
+                         'value': 'Not described'},
+                        {'label': 'Transwoman (MTF)',
+                         'value': 'Transwoman (MTF)'},
+                        {'label': 'Transman (FTM)',
+                         'value': 'Transman (FTM)'}
+
+                    ],
+                    value=['Male',
+                           'Female'],
+                    id="map-gender",
+                    switch=True,
+                    inline=True,
+                    className='input-element'
                 ),
             ]
         ),
         id='map-input-container',
-        width={'size': 2},
+        width={'size': 3},
         className='object-container',
     )
     ]),
@@ -151,10 +204,10 @@ layout = html.Div([
                             options=[
                                 {"label": "Brooklyn", "value": 'Brooklyn'},
                                 {"label": "Bronx", "value": 'Bronx'},
-                                {"label": "Manhattan", "Value": "Manhattan"},
-                                {"label": "Queens", "Value": "Queens"},
+                                {"label": "Manhattan", "value": "Manhattan"},
+                                {"label": "Queens", "value": "Queens"},
                                 {"label": "Staten Island",
-                                    "Value": "Staten Island"}
+                                    "value": "Staten Island"}
                             ],
                             placeholder="Select Borough...",
                             id="boro-selection",
@@ -164,9 +217,7 @@ layout = html.Div([
                         )],
                         className='input-element select'
                     ),
-
-                )
-
+                ),
             ),
             dbc.Row(
                 dbc.Col(
@@ -195,26 +246,26 @@ layout = html.Div([
             ),
 
         ],
-            width={'size': 3},
+            width={'size': 4},
             className='object-container'
         ),
     ]
     ),
 
     html.Br(),
-    html.Div(id='officer_info_input_div', children=[
+    dbc.Col(id='officer_info_input_div', children=[
         dbc.Row([
             # Officer Info input
             dbc.Col(
-
                 dbc.FormGroup(
                     [
+
                         dbc.Input(placeholder='Officer First Name', id='officer_fn',
                                   value=None, type='text', className='input-element'),
-
                     ],
                 ),
                 width=3,
+
             ),
             dbc.Col(
                 dbc.FormGroup(
@@ -236,7 +287,7 @@ layout = html.Div([
                                  "value": 'ethnicities_annual'},
                                 {"label": "Ethnicities of Complainants Overall",
                                  "value": 'ethnicities'},
-                                {"label": "Civilian Complaint Review Board Rulings",
+                                {"label": "Civilian Complaint Review Board Rulings by Complainant Ethnicity",
                                  "value": 'ccrb'},
 
                                 # {"label": "Filter by Zip Code",
@@ -253,19 +304,18 @@ layout = html.Div([
 
             )
         ]
-            # width={'size': 2, 'offset': 1}
-
 
         ),
     ],
-        className='object-container'),
+        className='object-container',
+        width={'size': 10, 'offset': 1}),
     html.Div(id='officer_figs_container',
              children=[
                  dbc.Row([
 
                      dbc.Col(
                          dcc.Graph(id='officer_data_table'),
-                         width={'size': 4},
+                         width={'size': 3, 'offset': 1},
                          className='object-container'
                      ),
                      dbc.Col(
@@ -286,7 +336,7 @@ layout = html.Div([
 # Callback for displaying officer info graphs
 
 
-@app.callback(
+@ app.callback(
     Output('officer_data_graph', 'figure'),
     [Input('officer_fn', 'value'), Input(
         'officer_ln', 'value'), Input('officer-graphs-filter', 'value')]
@@ -296,13 +346,17 @@ def update_figure(first, last, filter):
     condition1 = df_full.first_name == first.capitalize()
     condition2 = df_full.last_name == last.capitalize()
     df_officer = df_full[condition1 & condition2]
+    condition3 = df_officer.board_disposition.isin(
+        ['Unsubstantiated', 'Exonerated'])
+    df_officer['unsubstantiated/exonerated'] = condition3
     # Todo return alert that there is no one with that name in the datafram if df_officer is empty
 
     if filter == 'ethnicities':
         officer_ethnicity_grp = df_officer.groupby(
             ['complainant_ethnicity']).size()
         officer_ethnicity_grp = officer_ethnicity_grp.reset_index()
-        officer_ethnicity_grp.rename(columns={0: '#_complaints'}, inplace=True)
+        officer_ethnicity_grp.rename(
+            columns={0: '#_complaints'}, inplace=True)
         labels = list(officer_ethnicity_grp.complainant_ethnicity)
         values = list(officer_ethnicity_grp['#_complaints'])
         fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.3,
@@ -396,36 +450,102 @@ def update_figure(first, last):
 
 @ app.callback(
     Output('animated_annual_map', 'figure'),
-    [Input('map-input', 'value')]
+    [Input('map-input', 'value'), Input('map-filter', 'value'),
+        Input('map-ethnicity', 'value'), Input('map-gender', 'value')]
 )
-def update_figure(categories):
-    # Group by year, borough, precinct
-    df_cat = df_full[df_full.year_received > 1986]
-    # filter dataframe based on selected categories
-    df_cat = df_cat[df_full['fado_type'].isin(categories)]
-    precinct_grp = df_cat.groupby(by=['year_received', 'borough',
-                                      'precinct', 'long', 'lat', 'fado_type'],).size()
-    # Get dataframe from groupby object
-    precinct_grp = precinct_grp.reset_index()
-    # Change name of size(count) column to #_complaints
-    precinct_grp.rename(columns={0: '#_complaints'}, inplace=True)
-    # Order dataframe by year
-    precinct_grp.sort_values('year_received', inplace=True)
+def update_figure(categories, filter, ethnicities, genders):
+    if filter == 'complaint_types':
+        # Group by year, borough, precinct
+        df_cat = df_full[df_full.year_received > 1986]
+        # filter dataframe based on selected categories
+        df_cat = df_cat[df_full['fado_type'].isin(categories)]
+        precinct_grp = df_cat.groupby(by=['year_received', 'borough',
+                                          'precinct', 'long', 'lat', 'fado_type'],).size()
+        # Get dataframe from groupby object
+        precinct_grp = precinct_grp.reset_index()
+        # Change name of size(count) column to #_complaints
+        precinct_grp.rename(columns={0: '#_complaints'}, inplace=True)
+        # Order dataframe by year
+        precinct_grp.sort_values('year_received', inplace=True)
 
-    # Create labels dictionary for hover info
-    labels = {'precinct': 'Precinct',
-              'year_received': 'Complaint Year',
-              '#_complaints': 'No. Complaints',
-              'borough': 'Borough'}
-    # Create list of columns that would appear upon hovering, using the labels above
-    hover_data = {'precinct': True, 'year_received': True, 'borough': True, '#_complaints': True,
-                  'long': False, 'lat': False}
+        # Create labels dictionary for hover info
+        labels = {'precinct': 'Precinct',
+                  'year_received': 'Complaint Year',
+                  '#_complaints': 'No. Complaints',
+                  'borough': 'Borough'}
+        # Create list of columns that would appear upon hovering, using the labels above
+        hover_data = {'precinct': True, 'year_received': True, 'borough': True, '#_complaints': True,
+                      'long': False, 'lat': False}
 
-    # Create scatter mapbox using same dataframe
-    fig = px.scatter_mapbox(precinct_grp, lat="lat", lon="long",
-                            size='#_complaints',
-                            labels=labels, hover_data=hover_data, opacity=0.6,
-                            animation_frame='year_received', color='fado_type', zoom=8.5,)
+        # Create scatter mapbox using same dataframe
+        fig = px.scatter_mapbox(precinct_grp, lat="lat", lon="long",
+                                size='#_complaints',
+                                labels=labels, hover_data=hover_data, opacity=0.6,
+                                animation_frame='year_received', color='fado_type', zoom=8.5,)
+    elif filter == 'ethnicity':
+        # Group by precinct year, ethnicity
+        precinct_grp_ethnicity = df_full.groupby(
+            by=['year_received', 'precinct', 'complainant_ethnicity', 'address', 'long', 'lat', ],).size()
+        precinct_grp_ethnicity = precinct_grp_ethnicity.reset_index()
+        # Change name of size(count) column to #_complaints
+        precinct_grp_ethnicity.rename(
+            columns={0: '#_complaints'}, inplace=True)
+        # condition = precinct_grp_ethnicity['complainant_ethnicity'] != 'Refused'
+        # precinct_grp_ethnicity['complainant_ethnicity'].where(condition, )
+        # Order dataframe by year
+        ethnicities.append('Unknown')
+        if 'White' in ethnicities or 'Other Race' in ethnicities:
+            precinct_grp_ethnicity = precinct_grp_ethnicity[precinct_grp_ethnicity.year_received > 1998]
+
+        condition = precinct_grp_ethnicity['complainant_ethnicity'].isin(
+            ethnicities)
+        precinct_grp_ethnicity = precinct_grp_ethnicity[condition]
+        precinct_grp_ethnicity.sort_values(
+            by=['year_received', 'precinct', 'complainant_ethnicity'])
+
+        labels = {'complainant_ethnicity': 'Complainant Ethnicity',
+                  'precinct': 'Precinct',
+                  'year_received': 'Complaint Year',
+                  '#_complaints': 'No. Complaints'}
+        # Create list of columns that would appear upon hovering, using the labels above
+        hover_data = {'precinct': True, 'year_received': True, 'complainant_ethnicity': True, '#_complaints': True,
+                      'long': False, 'lat': False}
+        # Create scatter mapbox using same dataframe
+        fig = px.scatter_mapbox(precinct_grp_ethnicity, lat="lat", lon="long",
+                                size='#_complaints', color=precinct_grp_ethnicity.complainant_ethnicity,
+                                labels=labels, hover_data=hover_data, opacity=0.6,
+                                animation_frame='year_received', animation_group='complainant_ethnicity', zoom=9)
+    elif filter == 'gender':
+        # Group by precinct year, gender
+        precinct_grp_gender = df_full.groupby(
+            by=['year_received', 'precinct', 'complainant_gender', 'address', 'long', 'lat', ],).size()
+        precinct_grp_gender = precinct_grp_gender.reset_index()
+        # Change name of size(count) column to #_complaints
+        precinct_grp_gender.rename(columns={0: '#_complaints'}, inplace=True)
+        # Order dataframe by year
+        precinct_grp_gender.sort_values(
+            by=['year_received', 'precinct', 'complainant_gender'])
+        precinct_grp_gender = precinct_grp_gender[precinct_grp_gender.year_received > 1998]
+        if 'Not described' in genders:
+            precinct_grp_gender = precinct_grp_gender[precinct_grp_gender.year_received > 2003]
+        if 'Transwoman (MTF)' in genders:
+            precinct_grp_gender = precinct_grp_gender[precinct_grp_gender.year_received > 2015]
+        if 'Transman (FTM)' in genders:
+            precinct_grp_gender = precinct_grp_gender[precinct_grp_gender.year_received > 2016]
+        # Create labels dictionary for hover info
+        labels = {'complainant_gender': 'Complainant Gender',
+                  'precinct': 'Precinct',
+                  'year_received': 'Complaint Year',
+                  '#_complaints': 'No. Complaints'}
+        # Create list of columns that would appear upon hovering, using the labels above
+        hover_data = {'precinct': True, 'year_received': True, 'complainant_gender': True, '#_complaints': True,
+                      'long': False, 'lat': False}
+        # Create scatter mapbox using same dataframe
+        fig = px.scatter_mapbox(precinct_grp_gender, lat="lat", lon="long",
+                                size='#_complaints', color=precinct_grp_gender.complainant_gender,
+                                labels=labels, hover_data=hover_data, opacity=0.6,
+                                animation_frame='year_received', animation_group='complainant_gender', zoom=9)
+
     fig.update_layout(mapbox_style="light",
                       mapbox_accesstoken=mapbox_key)
     fig.layout.template = 'seaborn'
@@ -450,16 +570,17 @@ def update_figure(categories):
      Input('boro-selection', 'value'), Input('precinct-input', 'value')]
 )
 def update_figure(selected_year,  filter, selection, boro, precinct):
-    # Determin filter
-    if filter == 'precinct':
-        df_tmp = df_full[df_full.precinct == precinct]
-    elif filter == 'boro':
-        df_tmp = df_full[df_full.borough == boro]
-    else:
-        df_tmp = df_full
+    # # Determin filter
+    # if filter == 'precinct':
+    #     df_tmp = df_full[df_full.precinct == precinct]
+    # elif filter == 'boro':
+    #     df_tmp = df_full[df_full.borough == boro]
+    # else:
+    #     df_tmp = df_full
 
     if selection == 'totals':
         # Callback for complaint type numbers by year bar graph
+
         if selected_year == None:
             filtered_df = df_annual_ttls
             filtered_df = df_annual_ttls.drop(
@@ -491,9 +612,18 @@ def update_figure(selected_year,  filter, selection, boro, precinct):
         # Callback for gender distribution for selected year
         # Get data for selected year
         if selected_year == None:
-            filtered_df = df_tmp
+            filtered_df = df_full
+            if filter == 'precinct':
+                filtered_df = filtered_df[filtered_df.precinct == precinct]
+            elif filter == 'borough':
+                filtered_df = filtered_df[filtered_df.borough == boro]
         else:
-            filtered_df = df_tmp[df_tmp['year_received'] == selected_year]
+            filtered_df = df_full[df_full['year_received'] == selected_year]
+            if filter == 'precinct':
+                filtered_df = filtered_df[filtered_df.precinct == precinct]
+            elif filter == 'borough':
+                filtered_df = filtered_df[filtered_df.borough == boro]
+
         # Fill null values with "unknown"
         filtered_df['complainant_gender'].fillna('Unknown', inplace=True)
         filtered_df['mos_gender'].fillna('Unknown', inplace=True)
@@ -523,9 +653,17 @@ def update_figure(selected_year,  filter, selection, boro, precinct):
         # Callback for ethnicity distribution for selected year
         # Get data for selected year
         if selected_year == None:
-            filtered_df = df_tmp
+            filtered_df = df_full
+            if filter == 'precinct' and precinct is not None:
+                filtered_df = filtered_df[filtered_df.precinct == precinct]
+            elif filter == 'borough' and boro is not None:
+                filtered_df = filtered_df[filtered_df.borough == boro]
         else:
-            filtered_df = df_tmp[df_tmp['year_received'] == selected_year]
+            filtered_df = df_full[df_full['year_received'] == selected_year]
+            if filter == 'precinct' and precinct is not None:
+                filtered_df = filtered_df[filtered_df.precinct == precinct]
+            elif filter == 'borough' and boro is not None:
+                filtered_df = filtered_df[filtered_df.borough == boro]
         # Fill null values with "unknown"
         filtered_df['complainant_ethnicity'].fillna('Unknown', inplace=True)
         filtered_df['mos_ethnicity'].fillna('Unknown', inplace=True)
@@ -556,11 +694,107 @@ def update_figure(selected_year,  filter, selection, boro, precinct):
 
     return fig
 
+
 ### Callback for layout and visual adjustments######
 # Callback to disable precinct input unless precinct filtering is selected
 
 
-@app.callback(
+@ app.callback(
+    Output('map-gender', 'options'),
+    [Input('map-filter', 'value')]
+)
+def adjust_input(filter):
+    if filter == 'complaint_types' or filter == 'ethnicity':
+        return [
+            {'label': 'Male',
+             'value': 'Male', 'disabled': True},
+            {'label': 'Female',
+             'value': 'Female', 'disabled': True},
+            {'label': 'Unknown',
+             'value': 'Not described', 'disabled': True},
+            {'label': 'Transwoman (MTF)',
+             'value': 'Transwoman (MTF)', 'disabled': True},
+            {'label': 'Transman (FTM)',
+             'value': 'Transman (FTM)', 'disabled': True},
+
+        ]
+    elif filter == 'gender':
+        return [
+            {'label': 'Male',
+             'value': 'Male'},
+            {'label': 'Female',
+             'value': 'Female'},
+            {'label': 'Unknown',
+             'value': 'Not described'},
+            {'label': 'Transwoman (MTF)',
+             'value': 'Transwoman (MTF)'},
+            {'label': 'Transman (FTM)',
+             'value': 'Transman (FTM)'},
+
+        ]
+
+
+@ app.callback(
+    Output('map-ethnicity', 'options'),
+    [Input('map-filter', 'value')]
+)
+def adjust_input(filter):
+    if filter == 'complaint_types':
+        return [
+            {'label': 'Black',
+             'value': 'Black', 'disabled': True},
+            {'label': 'Hispanic',
+             'value': 'Hispanic', 'disabled': True},
+            {'label': 'White',
+             'value': 'White', 'disabled': True},
+            {'label': 'Other Race',
+             'value': 'Other Race', 'disabled': True},
+        ]
+    elif filter == 'ethnicity':
+        return [
+            {'label': 'Black',
+             'value': 'Black'},
+            {'label': 'Hispanic',
+             'value': 'Hispanic'},
+            {'label': 'White',
+             'value': 'White'},
+            {'label': 'Other Race',
+             'value': 'Other Race'},
+        ]
+
+
+@ app.callback(
+    Output('map-input', 'options'),
+    [Input('map-filter', 'value')]
+)
+def adjust_input(filter):
+
+    if filter == 'ethnicity':
+        return [
+            {'label': 'Abuse of Authority Complaints',
+                'value': 'Abuse of Authority', 'disabled': True},
+            {'label': 'Discourtesy Complaints',
+                'value': 'Discourtesy', 'disabled': True},
+            {'label': 'Use of Force Complaints',
+                'value': 'Force', 'disabled': True},
+            {'label': 'Offensive Language Complaints',
+                'value': 'Offensive Language', 'disabled': True},
+        ]
+    elif filter == 'complaint_types':
+        return [
+            {'label': 'Abuse of Authority Complaints',
+             'value': 'Abuse of Authority'},
+            {'label': 'Discourtesy Complaints',
+             'value': 'Discourtesy'},
+            {'label': 'Use of Force Complaints',
+             'value': 'Force'},
+            {'label': 'Offensive Language Complaints',
+             'value': 'Offensive Language'},
+        ]
+
+
+# Callback to disable precinct input unless precinct filter is selected
+@ app.callback(
     Output('precinct-input', 'disabled'),
     [Input('graphs-filter', 'value')]
 )
@@ -573,7 +807,7 @@ def adjust_input(filter):
 # Callback to disable borough input unless borough filtering is selected
 
 
-@app.callback(
+@ app.callback(
     Output('boro-selection', 'disabled'),
     [Input('graphs-filter', 'value')]
 )

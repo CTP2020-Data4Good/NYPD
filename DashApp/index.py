@@ -10,27 +10,22 @@ from app import app
 from app import server
 
 # Connect to any other app pages from apps folder
-from apps import predictions, annual
+from apps import predictions, annual, about
 
 
 app.layout = html.Div([
     html.Div([
         html.Nav(className='navbar navbar-expand-lg navbar-dark bg-primary', id='navbarColor01',
                  children=[html.A('NYPD Complaints Navigator',
-                                  className='navbar-brand', href='index'),
+                                  className='navbar-brand', id='navbar-brand', href='index'),
                            html.Div(className='collapse navbar-collapse',
                                     children=[
                                         html.Ul(className='navbar-nav mr-auto',
                                                 children=[
-                                                    html.Li(
-                                                        dcc.Link(
-                                                            'NYPD Complaints By Year', className='nav-link', href='/apps/annual'), className='nav-item',),
                                                     html.Li(dcc.Link(
                                                         'Machine Learning Model', className='nav-link', href='/apps/predictions', ), className='nav-item'),
                                                     html.Li(dcc.Link(
-                                                        'About', className='nav-link', href='/apps/about',),
-                                                        className='nav-item'
-                                                    )
+                                                        'About', className='nav-link', href='/apps/about', ), className='nav-item')
                                                 ]
 
                                                 )
@@ -63,14 +58,12 @@ home_layout = html.Div(id='home_layout', className="jumpotron",
     [Input(component_id='url', component_property='pathname',)]
 )
 def display_page(pathname):
-    if pathname == '/apps/annual':
-        return annual.layout
-    elif pathname == '/apps/predictions':
+    if pathname == '/apps/predictions':
         return predictions.layout
-    # elif pathname == '/apps/about':
-    #     return about.layout
+    elif pathname == '/apps/about':
+        return about.layout
     else:
-        return home_layout
+        return annual.layout
 
 
 if __name__ == '__main__':
