@@ -22,8 +22,8 @@ app.layout = html.Div([
                                     children=[
                                         html.Ul(className='navbar-nav mr-auto',
                                                 children=[
-                                                    html.Li(dcc.Link(
-                                                        'Machine Learning Model', className='nav-link', href='/apps/predictions', ), className='nav-item'),
+                                                    # html.Li(dcc.Link(
+                                                    #     'Machine Learning Model', className='nav-link', href='/apps/predictions', ), className='nav-item'),
                                                     html.Li(dcc.Link(
                                                         'About', className='nav-link', href='/apps/about', ), className='nav-item')
                                                 ]

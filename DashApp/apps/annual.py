@@ -51,17 +51,24 @@ layout = html.Div([
         dbc.Col(
         dbc.FormGroup(
             [
-                dbc.Select(
-                    options=[
-                        {"label": "Types of complaints",
-                         "value": 'complaint_types'},
-                        {"label": "Complainant Ethnicity", "value": 'ethnicity'},
-                        {"label": "Complainant Gender", "value": "gender"},
-                    ],
-                    placeholder="Select visualization...",
-                    id="map-filter",
-                    className='form-control input-element',
-                    value='complaint_types',
+                dbc.Row(
+                    dbc.Col(
+                        dbc.Select(
+                            options=[
+                                {"label": "Types of complaints",
+                                 "value": 'complaint_types'},
+                                {"label": "Complainant Ethnicity",
+                                    "value": 'ethnicity'},
+                                {"label": "Complainant Gender", "value": "gender"},
+                            ],
+                            placeholder="Select visualization...",
+                            id="map-filter",
+                            className='form-control custom-select',
+                            value='complaint_types',
+
+                        ),
+                        className='input-element select'
+                    ),
 
                 ),
                 # dbc.Label("Choose a bunch"),
@@ -233,7 +240,7 @@ layout = html.Div([
                                     {'label': 'Complainant and Officer Ethnicities',
                                      'value': 'ethnicities'}
                                 ],
-                                value='totals',
+                                value='ethnicities',
                                 id="bar_graph_selector",
                                 inline=False,
 
