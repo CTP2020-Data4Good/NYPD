@@ -11,6 +11,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 import pathlib
+import re
+import string
+
 
 # import our app
 from app import app
@@ -350,6 +353,14 @@ layout = html.Div([
 # Callback for displaying officer info graphs
 
 
+def text_pre_process(x):
+    x = x.strip()
+    x = x.lower()
+    x = x.capitalize()
+    x = x.strip('!#$%^&*()_?/\|.,{}[],<>=+123456789')
+    return x
+
+
 @ app.callback(
     Output('officer_data_graph', 'figure'),
     [Input('officer-search', 'n_clicks'), Input('officer-graphs-filter', 'value'), State('officer_fn', 'value'), State(
@@ -357,8 +368,8 @@ layout = html.Div([
 )
 def update_figure(n_clicks, filter, first, last):
     # Filter dataframe for officer data
-    condition1 = df_unique_complaints.first_name == first.capitalize()
-    condition2 = df_unique_complaints.last_name == last.capitalize()
+    condition1 = df_full.first_name == text_pre_process(first)
+    condition2 = df_full.last_name == text_pre_process(last)
     df_officer = df_unique_complaints[condition1 & condition2]
     condition3 = df_officer.board_disposition.isin(
         ['Unsubstantiated', 'Exonerated'])
@@ -435,8 +446,8 @@ def update_figure(n_clicks, filter, first, last):
 )
 def update_figure(n_clicks, first, last):
     # Filter dataframe for officer data
-    condition1 = df_full.first_name == first.capitalize()
-    condition2 = df_full.last_name == last.capitalize()
+    condition1 = df_full.first_name == text_pre_process(first)
+    condition2 = df_full.last_name == text_pre_process(last)
     df_officer = df_full[condition1 & condition2]
     # Create table with general data about officer
     # Group by year, fado_type, and get count
@@ -800,8 +811,8 @@ def adjust_input(filter):
         'officer_ln', 'value')]
 )
 def hide_container(n_clicks, first, last):
-    condition1 = df_unique_complaints.first_name == first.capitalize()
-    condition2 = df_unique_complaints.last_name == last.capitalize()
+    condition1 = df_full.first_name == text_pre_process(first)
+    condition2 = df_full.last_name == text_pre_process(last)
     df_officer = df_unique_complaints[condition1 & condition2]
     if len(df_officer) > 0:
         return {'display': 'block'}, True, False, True, False
