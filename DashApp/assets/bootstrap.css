@@ -44,7 +44,8 @@
   padding-bottom: 10x;
 }
 
-#boro-selection {
+#boro-selection,
+#map-filter {
   height: 38px;
   padding: 6px 10px;
   background-color: #fff;
@@ -132,6 +133,9 @@
   margin-bottom: 0;
   background-color: rgba(0, 0, 0, 0.03);
   border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+#officer_figs_container { 
+  display: none; 
 }
 /* End OUR OWN STYLING CHANGES*/
 

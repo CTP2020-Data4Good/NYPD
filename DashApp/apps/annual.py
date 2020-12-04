@@ -5,7 +5,7 @@ import dash_core_components as dcc
 from dash_core_components.Dropdown import Dropdown
 import dash_html_components as html
 import dash_bootstrap_components as dbc
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 from pandas.io.formats import style
 import plotly.express as px
 import plotly.graph_objects as go
@@ -24,8 +24,15 @@ df_annual_ttls = pd.read_csv(DATA_PATH.joinpath('annual_totals.csv'))
 df_full = pd.read_csv(DATA_PATH.joinpath(
     'allegations_precinct_address_included.csv'))
 
+# Datafram cleanup
 # Drop 2020 because data is incomplete
 df_full = df_full[df_full.year_received < 2020]
+df_full.drop_duplicates(inplace=True)
+df_unique_complaints = df_full.drop_duplicates(
+    subset='complaint_id', inplace=False)
+
+# Data for later reference
+precincts = list(df_unique_complaints.precinct.unique())
 
 # Set mapbox key
 # Access mapbox api using mapbox access token
@@ -50,10 +57,11 @@ layout = html.Div([
             className='object-container'),
         dbc.Col(
         dbc.FormGroup(
-            [
-                dbc.Row(
-                    dbc.Col(
-                        dbc.Select(
+            [dbc.Row(
+                dbc.Col(
+                    html.Div(
+                        # Select Borough Menu
+                        [dbc.Select(
                             options=[
                                 {"label": "Types of complaints",
                                  "value": 'complaint_types'},
@@ -61,16 +69,16 @@ layout = html.Div([
                                     "value": 'ethnicity'},
                                 {"label": "Complainant Gender", "value": "gender"},
                             ],
-                            placeholder="Select visualization...",
+                            placeholder="Select visualizations...",
                             id="map-filter",
-                            className='form-control custom-select',
-                            value='complaint_types',
+                            className='form-control',
+                            value='complaint_types'
 
-                        ),
+                        )],
                         className='input-element select'
                     ),
-
                 ),
+            ),
                 # dbc.Label("Choose a bunch"),
                 dbc.Checklist(
                     options=[
@@ -88,7 +96,7 @@ layout = html.Div([
                     id="map-input",
                     switch=True,
                     className='input-element'
-                ),
+            ),
                 dbc.Checklist(
                     options=[
                         {'label': 'Black',
@@ -106,7 +114,7 @@ layout = html.Div([
                     switch=True,
                     inline=True,
                     className='input-element'
-                ),
+            ),
                 dbc.Checklist(
                     options=[
                         {'label': 'Male',
@@ -127,7 +135,7 @@ layout = html.Div([
                     switch=True,
                     inline=True,
                     className='input-element'
-                ),
+            ),
             ]
         ),
         id='map-input-container',
@@ -194,8 +202,8 @@ layout = html.Div([
                     # Select Precinct input
                     html.Div(
                         [
-                            dbc.Input(type="number", list=list(
-                                range(int(df_full['precinct'].min()), int(df_full['precinct'].max()))), step=1, max=int(df_full['precinct'].max()), min=int(df_full['precinct'].min()), disabled=True, placeholder='Enter Precinct...', id="precinct-input",),
+                            dbc.Input(type="number", list=precincts, max=int(df_full['precinct'].max()), min=int(
+                                df_full['precinct'].min()), disabled=True, placeholder='Enter Precinct...', id="precinct-input",),
                         ],
                         className='input-element'
 
@@ -264,24 +272,24 @@ layout = html.Div([
         dbc.Row([
             # Officer Info input
             dbc.Col(
-                dbc.FormGroup(
-                    [
+                dbc.Form([
+                    dbc.FormGroup([
+                        dbc.Col([dbc.Input(placeholder='Officer First Name', id='officer_fn',
+                                           value=None, type='text', className='input-element',),
+                                 dbc.Input(placeholder='Officer Last Name', id='officer_ln',
+                                           value=None, type='text', className='input-element',),
+                                 dbc.FormFeedback(
+                                     "Officer not found in database. ", valid=False),
+                                 dbc.FormFeedback("Officer found.", valid=True)
+                                 ], width={'size': 12}),
 
-                        dbc.Input(placeholder='Officer First Name', id='officer_fn',
-                                  value=None, type='text', className='input-element'),
                     ],
+                    ),
+                    dbc.Col(html.Button('Search', id='officer-search',
+                                        n_clicks=0, className='input-element btn btn-primary'), width=2)],
+                    inline=True
                 ),
-                width=3,
-
-            ),
-            dbc.Col(
-                dbc.FormGroup(
-                    [
-                        dbc.Input(placeholder='Officer Last Name', id='officer_ln',
-                                  value=None, type='text', className='input-element'),
-                    ],
-                ),
-                width=3
+                width=6
             ),
             dbc.Col(
                 dbc.FormGroup(
@@ -296,9 +304,6 @@ layout = html.Div([
                                  "value": 'ethnicities'},
                                 {"label": "Civilian Complaint Review Board Rulings by Complainant Ethnicity",
                                  "value": 'ccrb'},
-
-                                # {"label": "Filter by Zip Code",
-                                #     "value": 'zc'},
                             ],
                             value='complaint_types_annual',
                             id="officer-graphs-filter",
@@ -307,12 +312,14 @@ layout = html.Div([
 
                         ),
                     ],
-                )
+                ),
+                width=6
 
             )
         ]
 
         ),
+        dbc.Row()
     ],
         className='object-container',
         width={'size': 10, 'offset': 1}),
@@ -345,10 +352,10 @@ layout = html.Div([
 
 @ app.callback(
     Output('officer_data_graph', 'figure'),
-    [Input('officer_fn', 'value'), Input(
-        'officer_ln', 'value'), Input('officer-graphs-filter', 'value')]
+    [Input('officer-search', 'n_clicks'), Input('officer-graphs-filter', 'value'), State('officer_fn', 'value'), State(
+        'officer_ln', 'value')]
 )
-def update_figure(first, last, filter):
+def update_figure(n_clicks, filter, first, last):
     # Filter dataframe for officer data
     condition1 = df_full.first_name == first.capitalize()
     condition2 = df_full.last_name == last.capitalize()
@@ -424,10 +431,10 @@ def update_figure(first, last, filter):
 
 @ app.callback(
     Output('officer_data_table', 'figure'),
-    [Input('officer_fn', 'value'), Input(
+    [Input('officer-search', 'n_clicks'), State('officer_fn', 'value'), State(
         'officer_ln', 'value')]
 )
-def update_figure(first, last):
+def update_figure(n_clicks, first, last):
     # Filter dataframe for officer data
     condition1 = df_full.first_name == first.capitalize()
     condition2 = df_full.last_name == last.capitalize()
@@ -452,6 +459,7 @@ def update_figure(first, last):
     )
     ])
     fig.layout = general_layout
+    fig.update_layout(width=350)
     return fig
 
 
@@ -463,9 +471,9 @@ def update_figure(first, last):
 def update_figure(categories, filter, ethnicities, genders):
     if filter == 'complaint_types':
         # Group by year, borough, precinct
-        df_cat = df_full[df_full.year_received > 1986]
+        df_cat = df_unique_complaints[df_unique_complaints.year_received > 1986]
         # filter dataframe based on selected categories
-        df_cat = df_cat[df_full['fado_type'].isin(categories)]
+        df_cat = df_cat[df_cat['fado_type'].isin(categories)]
         precinct_grp = df_cat.groupby(by=['year_received', 'borough',
                                           'precinct', 'long', 'lat', 'fado_type'],).size()
         # Get dataframe from groupby object
@@ -491,7 +499,7 @@ def update_figure(categories, filter, ethnicities, genders):
                                 animation_frame='year_received', color='fado_type', zoom=8.5,)
     elif filter == 'ethnicity':
         # Group by precinct year, ethnicity
-        precinct_grp_ethnicity = df_full.groupby(
+        precinct_grp_ethnicity = df_unique_complaints.groupby(
             by=['year_received', 'precinct', 'complainant_ethnicity', 'address', 'long', 'lat', ],).size()
         precinct_grp_ethnicity = precinct_grp_ethnicity.reset_index()
         # Change name of size(count) column to #_complaints
@@ -500,8 +508,9 @@ def update_figure(categories, filter, ethnicities, genders):
         # condition = precinct_grp_ethnicity['complainant_ethnicity'] != 'Refused'
         # precinct_grp_ethnicity['complainant_ethnicity'].where(condition, )
         # Order dataframe by year
-        ethnicities.append('Unknown')
+
         if 'White' in ethnicities or 'Other Race' in ethnicities:
+            ethnicities.append('Unknown')
             precinct_grp_ethnicity = precinct_grp_ethnicity[precinct_grp_ethnicity.year_received > 1998]
 
         condition = precinct_grp_ethnicity['complainant_ethnicity'].isin(
@@ -524,7 +533,7 @@ def update_figure(categories, filter, ethnicities, genders):
                                 animation_frame='year_received', animation_group='complainant_ethnicity', zoom=9)
     elif filter == 'gender':
         # Group by precinct year, gender
-        precinct_grp_gender = df_full.groupby(
+        precinct_grp_gender = df_unique_complaints.groupby(
             by=['year_received', 'precinct', 'complainant_gender', 'address', 'long', 'lat', ],).size()
         precinct_grp_gender = precinct_grp_gender.reset_index()
         # Change name of size(count) column to #_complaints
@@ -539,6 +548,9 @@ def update_figure(categories, filter, ethnicities, genders):
             precinct_grp_gender = precinct_grp_gender[precinct_grp_gender.year_received > 2015]
         if 'Transman (FTM)' in genders:
             precinct_grp_gender = precinct_grp_gender[precinct_grp_gender.year_received > 2016]
+        condition = precinct_grp_gender['complainant_gender'].isin(
+            genders)
+        precinct_grp_gender = precinct_grp_gender[condition]
         # Create labels dictionary for hover info
         labels = {'complainant_gender': 'Complainant Gender',
                   'precinct': 'Precinct',
@@ -577,61 +589,31 @@ def update_figure(categories, filter, ethnicities, genders):
      Input('boro-selection', 'value'), Input('precinct-input', 'value')]
 )
 def update_figure(selected_year,  filter, selection, boro, precinct):
-    # # Determin filter
-    # if filter == 'precinct':
-    #     df_tmp = df_full[df_full.precinct == precinct]
-    # elif filter == 'boro':
-    #     df_tmp = df_full[df_full.borough == boro]
-    # else:
-    #     df_tmp = df_full
+    # Determin filter
+    if filter == 'precinct':
+        df_tmp = df_unique_complaints[df_unique_complaints.precinct == precinct]
+    elif filter == 'borough':
+        df_tmp = df_unique_complaints[df_unique_complaints.borough == boro]
+    else:
+        df_tmp = df_unique_complaints
+    if selected_year != None:
+        df_tmp = df_tmp[df_tmp.year_received == selected_year]
 
     if selection == 'totals':
         # Callback for complaint type numbers by year bar graph
+        filtered_df = pd.DataFrame(df_tmp.fado_type.value_counts())
+        filtered_df.reset_index(inplace=True)
+        filtered_df.rename(
+            columns={'index': 'Complaint Type', 'fado_type': 'No. Complaints'}, inplace=True)
+        filtered_df.sort_values(
+            by='No. Complaints', ascending=False, inplace=True)
+        fig = px.bar(filtered_df, x='Complaint Type', y='No. Complaints', )
 
-        if selected_year == None:
-            filtered_df = df_annual_ttls
-            filtered_df = df_annual_ttls.drop(
-                ['unsubstantiated_or_exnrtd', 'substantiated_(any)', 'year_received'], axis=1)
-            filtered_df = pd.DataFrame(filtered_df.sum())
-            filtered_df.reset_index(inplace=True)
-            filtered_df.columns = ['fado_type', 'total']
-            filtered_df.sort_values('total', ascending=False, inplace=True)
-            fig = px.bar(filtered_df, x='fado_type', y='total', )
-
-        else:
-            filtered_df = df_annual_ttls[df_annual_ttls.year_received == selected_year]
-            # Drop unsubstantiated_or_exnrtd since it's not relevant to this graph
-            filtered_df.drop(['unsubstantiated_or_exnrtd',
-                              'substantiated_(any)'], axis=1, inplace=True)
-            # Drop year since we don't want it in this visualization, it's assumed from input
-            filtered_df.drop('year_received', axis=1, inplace=True)
-            # Transpose so we don't have to work with wideform df
-            filtered_df = filtered_df.T
-            # Reset index
-            filtered_df.reset_index(inplace=True)
-            # Name our columns so we can reference them easily when creating figure
-            filtered_df.columns = ['fado_type', 'total']
-            # Sort the df by total
-            filtered_df.sort_values('total', ascending=False, inplace=True)
-            # Build the visualization, using this filtered_df
-            fig = px.bar(filtered_df, x='fado_type', y='total', )
     elif selection == 'genders':
         # Callback for gender distribution for selected year
-        # Get data for selected year
-        if selected_year == None:
-            filtered_df = df_full
-            if filter == 'precinct':
-                filtered_df = filtered_df[filtered_df.precinct == precinct]
-            elif filter == 'borough':
-                filtered_df = filtered_df[filtered_df.borough == boro]
-        else:
-            filtered_df = df_full[df_full['year_received'] == selected_year]
-            if filter == 'precinct':
-                filtered_df = filtered_df[filtered_df.precinct == precinct]
-            elif filter == 'borough':
-                filtered_df = filtered_df[filtered_df.borough == boro]
 
         # Fill null values with "unknown"
+        filtered_df = df_tmp
         filtered_df['complainant_gender'].fillna('Unknown', inplace=True)
         filtered_df['mos_gender'].fillna('Unknown', inplace=True)
         # Collect information about complainant ethnicity in dataframe
@@ -659,19 +641,13 @@ def update_figure(selected_year,  filter, selection, boro, precinct):
     elif selection == 'ethnicities':
         # Callback for ethnicity distribution for selected year
         # Get data for selected year
-        if selected_year == None:
-            filtered_df = df_full
-            if filter == 'precinct' and precinct is not None:
-                filtered_df = filtered_df[filtered_df.precinct == precinct]
-            elif filter == 'borough' and boro is not None:
-                filtered_df = filtered_df[filtered_df.borough == boro]
-        else:
-            filtered_df = df_full[df_full['year_received'] == selected_year]
-            if filter == 'precinct' and precinct is not None:
-                filtered_df = filtered_df[filtered_df.precinct == precinct]
-            elif filter == 'borough' and boro is not None:
-                filtered_df = filtered_df[filtered_df.borough == boro]
+        # if selected_year == None:
+        #     filtered_df = df_tmp
+        # else:
+        #     filtered_df = df_full[df_full['year_received'] == selected_year]
+
         # Fill null values with "unknown"
+        filtered_df = df_tmp
         filtered_df['complainant_ethnicity'].fillna('Unknown', inplace=True)
         filtered_df['mos_ethnicity'].fillna('Unknown', inplace=True)
         # Collect information about complainant ethnicity in dataframe
@@ -698,7 +674,8 @@ def update_figure(selected_year,  filter, selection, boro, precinct):
 
     fig.layout = general_layout
     fig.update_layout(barmode='group')
-
+    if selection == 'genders':
+        fig.update_layout(legend={'orientation': 'v'})
     return fig
 
 
@@ -746,7 +723,7 @@ def adjust_input(filter):
     [Input('map-filter', 'value')]
 )
 def adjust_input(filter):
-    if filter == 'complaint_types':
+    if filter == 'complaint_types' or filter == 'gender':
         return [
             {'label': 'Black',
              'value': 'Black', 'disabled': True},
@@ -776,7 +753,7 @@ def adjust_input(filter):
 )
 def adjust_input(filter):
 
-    if filter == 'ethnicity':
+    if filter == 'ethnicity' or filter == 'gender':
         return [
             {'label': 'Abuse of Authority Complaints',
                 'value': 'Abuse of Authority', 'disabled': True},
@@ -829,30 +806,16 @@ def adjust_input(filter):
 
 @ app.callback(
     Output('officer_figs_container', 'style'),
-    [Input('officer_fn', 'value'), Input(
+    Output('officer_fn', 'valid'), Output('officer_fn', 'invalid'),
+    Output('officer_ln', 'valid'), Output('officer_ln', 'invalid'),
+    [Input('officer-search', 'n_clicks'), State('officer_fn', 'value'), State(
         'officer_ln', 'value')]
 )
-def hide_container(fn, ln):
-    if fn is not None and ln is not None:
-        return {'display': 'block'}
+def hide_container(n_clicks, first, last):
+    condition1 = df_full.first_name == first.capitalize()
+    condition2 = df_full.last_name == last.capitalize()
+    df_officer = df_full[condition1 & condition2]
+    if len(df_officer) > 0:
+        return {'display': 'block'}, True, False, True, False
     else:
-        return {'display': 'none'}
-
-
-# app.layout = html.Div([
-#     html.H1("Annual Data Page"),
-
-#     dcc.Dropdown(
-#         id='years-dropdown',
-#         options=[
-#             {'label': '1985', 'value': 1985},
-#             {'label': '1986', 'value': 1986},
-#             {'label': '1987', 'value': 1987}
-#         ],
-#         value=1985,  # initial selected value
-#         multi=False,
-#         style={'width': '40%'}
-
-#     ),
-#     html.Div(id='output-container'), # Where the output will go
-# ])
+        return {'display': 'none'}, False, True, False, True
