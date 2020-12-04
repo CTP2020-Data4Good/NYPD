@@ -14,9 +14,6 @@
 
 /* OUR OWN STYLING CHANGES*/
 .drop-down-menus {
-  /* border-color: #18bc9c; */
-  /* font-size: 16px;
-  border: none; */
   cursor: pointer;
   background-color: rgb(202, 210, 211);
   /* box-shadow: 0 0 0 0.2rem rgba(24, 188, 156, 0.25); */
@@ -76,24 +73,10 @@
   box-shadow: 0 0 0 0.2rem rgba(95, 99, 98, 0.25);
   margin: 5px;
   border-radius: 5px;
-  /* display: flex;
-  justify-content: center;
-  align-items: center; */
 }
-/* .nav-link {
-  display: block;
-  padding-top: 1.3rem;
-  /* padding: 0.5rem 2rem; */
-/* padding-top: 2rem;
-  padding-left: 5em;
-  padding-right: 5rem; */
-/* font-size: 1.5rem; */
-/* } */
 
 #this-brand {
   display: inline-block;
-  /* padding-top: 0.324219rem;
-  padding-bottom: 0.324219rem; */
   padding-top: 1rem;
   padding-bottom: 1rem;
   padding-left: 1in;
@@ -122,11 +105,6 @@
   font-weight: 300;
   text-align: center;
 }
-/* 
-#space-in-between {
-  margin-top: 1.5in;
-  margin-bottom: 1.5in;
-} */
 
 .card-header {
   padding: 0.75rem 1.25rem;
@@ -134,8 +112,8 @@
   background-color: rgba(0, 0, 0, 0.03);
   border-bottom: 1px solid rgba(0, 0, 0, 0.125);
 }
-#officer_figs_container { 
-  display: none; 
+#officer_figs_container {
+  display: none;
 }
 /* End OUR OWN STYLING CHANGES*/
 

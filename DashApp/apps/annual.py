@@ -357,13 +357,12 @@ layout = html.Div([
 )
 def update_figure(n_clicks, filter, first, last):
     # Filter dataframe for officer data
-    condition1 = df_full.first_name == first.capitalize()
-    condition2 = df_full.last_name == last.capitalize()
-    df_officer = df_full[condition1 & condition2]
+    condition1 = df_unique_complaints.first_name == first.capitalize()
+    condition2 = df_unique_complaints.last_name == last.capitalize()
+    df_officer = df_unique_complaints[condition1 & condition2]
     condition3 = df_officer.board_disposition.isin(
         ['Unsubstantiated', 'Exonerated'])
     df_officer['unsubstantiated/exonerated'] = condition3
-    # Todo return alert that there is no one with that name in the datafram if df_officer is empty
 
     if filter == 'ethnicities':
         officer_ethnicity_grp = df_officer.groupby(
@@ -505,9 +504,6 @@ def update_figure(categories, filter, ethnicities, genders):
         # Change name of size(count) column to #_complaints
         precinct_grp_ethnicity.rename(
             columns={0: '#_complaints'}, inplace=True)
-        # condition = precinct_grp_ethnicity['complainant_ethnicity'] != 'Refused'
-        # precinct_grp_ethnicity['complainant_ethnicity'].where(condition, )
-        # Order dataframe by year
 
         if 'White' in ethnicities or 'Other Race' in ethnicities:
             ethnicities.append('Unknown')
@@ -569,11 +565,9 @@ def update_figure(categories, filter, ethnicities, genders):
                       mapbox_accesstoken=mapbox_key)
     fig.layout.template = 'seaborn'
     fig.layout.paper_bgcolor = 'rgb(246, 246, 244)'
-    # 'rgb(202, 210, 211)'
     margins = {'l': 10, 'r': 10, 't': 20, 'b': 0}
     legend_title = {'text': ''}
     fig.update_layout(margin=margins)
-    # 'bgcolor': 'rgb(52, 51, 50)' legend
     legend_details = {'orientation': 'h',  'x': 0.4,
                       'bgcolor': 'rgb(246, 246, 244)', 'title': legend_title}
     fig.update_layout(legend=legend_details)
@@ -639,12 +633,6 @@ def update_figure(selected_year,  filter, selection, boro, precinct):
                               ])
         # fig.update_layout(barmode='group')
     elif selection == 'ethnicities':
-        # Callback for ethnicity distribution for selected year
-        # Get data for selected year
-        # if selected_year == None:
-        #     filtered_df = df_tmp
-        # else:
-        #     filtered_df = df_full[df_full['year_received'] == selected_year]
 
         # Fill null values with "unknown"
         filtered_df = df_tmp
@@ -812,9 +800,9 @@ def adjust_input(filter):
         'officer_ln', 'value')]
 )
 def hide_container(n_clicks, first, last):
-    condition1 = df_full.first_name == first.capitalize()
-    condition2 = df_full.last_name == last.capitalize()
-    df_officer = df_full[condition1 & condition2]
+    condition1 = df_unique_complaints.first_name == first.capitalize()
+    condition2 = df_unique_complaints.last_name == last.capitalize()
+    df_officer = df_unique_complaints[condition1 & condition2]
     if len(df_officer) > 0:
         return {'display': 'block'}, True, False, True, False
     else:

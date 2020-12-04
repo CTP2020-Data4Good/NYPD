@@ -10,7 +10,7 @@ from app import app
 from app import server
 
 # Connect to any other app pages from apps folder
-from apps import predictions, annual, about
+from apps import annual, about
 
 
 app.layout = html.Div([
@@ -22,8 +22,6 @@ app.layout = html.Div([
                                     children=[
                                         html.Ul(className='navbar-nav mr-auto',
                                                 children=[
-                                                    # html.Li(dcc.Link(
-                                                    #     'Machine Learning Model', className='nav-link', href='/apps/predictions', ), className='nav-item'),
                                                     html.Li(dcc.Link(
                                                         'About', className='nav-link', href='/apps/about', ), className='nav-item')
                                                 ]
@@ -58,9 +56,7 @@ home_layout = html.Div(id='home_layout', className="jumpotron",
     [Input(component_id='url', component_property='pathname',)]
 )
 def display_page(pathname):
-    if pathname == '/apps/predictions':
-        return predictions.layout
-    elif pathname == '/apps/about':
+    if pathname == '/apps/about':
         return about.layout
     else:
         return annual.layout
