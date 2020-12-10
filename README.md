@@ -4,7 +4,7 @@
 
 Due to an upsurge in advocacy against police misconduct and for transparency, in the summer of 2020 New York State repealed laws which had for years denied the public access to NYPD disciplinary records. The reform resulted in the release of a database featuring 12,000 civilian complaints of police misconduct, including tens of thousands of allegations. NYPD Complaint Navigator is a data visualization "dashboard" application, that enables users to filter and analyze this newly available data. This application is intended as a tool for community members, activists, and policy makers to facilitate the understanding and exploration of this data. We hope that this tool can be especially useful to communities impacted by police misconduct.
 
-NYPD Complaint Navigator is a student project developed by Computer Science Students at the City University of New York.
+NYPD Complaint Navigator is a student project developed by Computer Science students at the City University of New York.
 
 ## About The Data
 
