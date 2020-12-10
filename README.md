@@ -8,7 +8,10 @@ NYPD Complaint Navigator is a student project developed by Computer Science stud
 
 ## About The Data
 
-The data used in this application is downloaded from ProPublica's Data Store. The data features: - 12,000 unique complaints filed against 4,000 active duty officers, and over 30,000 distinct allegations. - Civilian complaints dating back to 1985. - Demographic information associated with each allegation, including complainant and officer ethnicity and gender, precincts associated with each complaint, and Civilian Review Board outcome.
+The data used in this application is downloaded from ProPublica's Data Store. The data features: 
+	- 12,000 unique complaints filed against 4,000 active duty officers, and over 30,000 distinct allegations. 
+	- Civilian complaints dating back to 1985. 
+	- Demographic information associated with each allegation, including complainant and officer ethnicity and gender, precincts associated with each 		complaint, and Civilian Review Board outcome.
 
 These details are used to create the visualizations provided in the NYPD Complaitns Navigator. Users of the application can search for a specific officer and view a summary and visualizations based on data from allegation made against the given officer.
 
