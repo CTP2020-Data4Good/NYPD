@@ -19,7 +19,7 @@ These details are used to create the visualizations provided in the NYPD Complai
 The NYPD Complaints Navigator was built using the Dash Web-App Framework. We used Pandas and Numpy for data wrangling and data analysis. We used the Plotly Graphing Library to generate interactive visualizations. We used Google Geolocation API to populate the dataframes with geographic coordinates and produce map visualizations. Finally we styled the app using the Dash Bootstrap Components library and CSS3 for further customization, and deployed it using Heroku.
 
 <img src="Images/tools.png" alt="Kitten"
-	title="A cute kitten" width="430" height="250" />
+	title="A cute kitten" width="470" height="280" />
 
 ## Try The Dashboard ([NYPD Complaints Navigator](https://nypdcomplaintsnavigator.herokuapp.com/))
 
