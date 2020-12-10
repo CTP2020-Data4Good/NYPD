@@ -34,10 +34,11 @@ layout = html.Div([
                                       className="card-header"),
                              html.Div(className="card-body",
                                       children=[
-                                          html.P("Due to an upsurge in advocacy against police misconduct and for transparency, in the summer of 2020 New York State repealed laws  which had for years denied the public access to NYPD disciplinary records. The reform resulted in the release of a database featuring 12,000 civilian complaints of police misconduct, including tens of thousands of allegations. NYPD Complaint Navigator is a data visualization \"dashboard\" application, that enables users to filter and analyze this newly available data. This application is intended as a tool for community memebers, activists, and policy makers to facilitate the understanding and exploration of this data. We hope that this tool can be especially useful to communities impacted by police misconduct.", className="card-text"),
+                                          html.P("Due to an upsurge in advocacy against police misconduct and for transparency, in the summer of 2020 New York State repealed laws  which had for years denied the public access to NYPD disciplinary records. The reform resulted in the release of a database featuring 12,000 civilian complaints of police misconduct, including tens of thousands of allegations. NYPD Complaint Navigator is a data visualization \"dashboard\" application, that enables users to filter and analyze this newly available data. This application is intended as a tool for community members, activists, and policy makers to facilitate the understanding and exploration of this data. We hope that this tool can be especially useful to communities impacted by police misconduct.", className="card-text"),
                                           html.Br(),
-                                          html.P("NYPD Complaint Navigator is a student project developed by Computer Science Students at the City University of New York. To view the code for this project or contribute to improving it, visit the project github page."
-                                                 )
+                                          html.P(["NYPD Complaint Navigator is a student project developed by Computer Science Students at the City University of New York. To view the code for this project or contribute to improving it, visit the project ", html.A(
+                                              "github", href="https://github.com/CTP2020-Data4Good/NYPD"), " page."]),
+
                                       ]
                                       ),
                          ],
@@ -53,7 +54,7 @@ layout = html.Div([
                              html.Div(className="card-body",
                                       children=[
                                           html.P(
-                                              "The data used in this application is downloaded from ProPublica's Data Store. The data features:", className="card-text"),
+                                              ["The data used in this application is downloaded from ProPublica's", html.A(" Data Store", href="https://www.propublica.org/datastore/dataset/civilian-complaints-against-new-york-city-police-officers"), ". The data features:"], className="card-text"),
                                           html.Ul([
                                               html.Li("12,000 unique complaints filed against 4,000 active duty officers, and over 30,000 distinct allegations."
                                                       ),
@@ -119,52 +120,6 @@ layout = html.Div([
                  ]),
 
                  html.Br(id="space-in-between"),
-
-                 #  dbc.Row([
-                 #      # NYPD Complaints By Year
-                 #      dbc.Col([
-                 #          html.Div(className="card text-white bg-primary mb-6", style={"max-width": "60rem", "text-align": "center"},
-                 #                   children=[
-                 #              html.Div("NYPD Complaints By Year",
-                 #                       className="card-header"),
-                 #              html.Div(className="card-body",
-                 #                       children=[
-                 #                           html.H2("NYPD Complaints By Year",
-                 #                                   className="card-title"),
-                 #                           html.P("something to introduce the feature ",
-                 #                                  className="card-text"),
-                 #                           dbc.Button("NYPD Complaints By Year",
-                 #                                      className="btn btn-secondary btn-lg",
-                 #                                      href='/apps/annual',
-                 #                                      size="lg"),
-                 #                       ]
-                 #                       ),
-                 #          ],
-                 #          ),
-                 #      ], width=5),
-
-                 #      # Machine Learning Model
-                 #      dbc.Col([
-                 #          html.Div(className="card text-white bg-primary mb-6", style={"max-width": "60rem", "text-align": "center"},
-                 #                   children=[
-                 #              html.Div("Machine Learning Model",
-                 #                       className="card-header"),
-                 #              html.Div(className="card-body",
-                 #                       children=[
-                 #                           html.H2("Machine Learning Model",
-                 #                                   className="card-title"),
-                 #                           html.P("something to introduce the feature ",
-                 #                                  className="card-text"),
-                 #                           dbc.Button("NYPD Complaints By Year",
-                 #                                      className="btn btn-secondary btn-lg",
-                 #                                      href='/apps/predictions',
-                 #                                      size="lg"),
-                 #                       ]
-                 #                       ),
-                 #          ],
-                 #          ),
-                 #      ], width=5),
-                 #  ], justify="center"),
 
              ], style={"marginTop": 0, "marginBottom": 0, "fontSize": 15, },
              #  "font-weight": "lighter"

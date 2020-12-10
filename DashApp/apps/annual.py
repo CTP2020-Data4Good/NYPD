@@ -37,17 +37,13 @@ df_unique_complaints = df_full.drop_duplicates(
 # Data for later reference
 precincts = list(df_unique_complaints.precinct.unique())
 
-# Set mapbox key
-# Access mapbox api using mapbox access token
-with open("./mapbox_token", 'r') as f:
-    mapbox_key = f.read().strip()
 
 # Create General Layout format to reuse
 margins = {'l': 30, 'r': 30, 't': 20, 'b': 20}
 legend_title = {'text': ''}
 # fig.update_layout(margin = margins)
 legend_details = {'orientation': 'h',
-                  'bgcolor': 'rgb(246, 246, 244)', 'x': 0.3, 'title': legend_title}
+                  'bgcolor': 'rgb(246, 246, 244)', 'x': 0.3, 'title': legend_title, 'itemsizing': 'constant'}
 # fig.update_layout(legend=legend_details)
 # paper_bgcolor='rgb(25, 26, 26)'
 general_layout = go.Layout(template='seaborn', plot_bgcolor='rgba(0,0,0,0)',
@@ -332,12 +328,12 @@ layout = html.Div([
 
                      dbc.Col(
                          dcc.Graph(id='officer_data_table'),
-                         width={'size': 3, 'offset': 1},
+                         width={'size': 4, 'offset': 1},
                          className='object-container'
                      ),
                      dbc.Col(
                          dcc.Graph(id='officer_data_graph'),
-                         width={'size': 7},
+                         width={'size': 6},
                          className='object-container'
                      )
                  ],
@@ -363,13 +359,14 @@ def text_pre_process(x):
 
 @ app.callback(
     Output('officer_data_graph', 'figure'),
-    [Input('officer-search', 'n_clicks'), Input('officer-graphs-filter', 'value'), State('officer_fn', 'value'), State(
+    [Input('officer-search', 'n_clicks'), Input('officer-graphs-filter', 'value'),
+     State('officer_fn', 'value'), State(
         'officer_ln', 'value')]
 )
 def update_figure(n_clicks, filter, first, last):
     # Filter dataframe for officer data
-    condition1 = df_full.first_name == text_pre_process(first)
-    condition2 = df_full.last_name == text_pre_process(last)
+    condition1 = df_unique_complaints.first_name == text_pre_process(first)
+    condition2 = df_unique_complaints.last_name == text_pre_process(last)
     df_officer = df_unique_complaints[condition1 & condition2]
     condition3 = df_officer.board_disposition.isin(
         ['Unsubstantiated', 'Exonerated'])
@@ -452,24 +449,28 @@ def update_figure(n_clicks, first, last):
     # Create table with general data about officer
     # Group by year, fado_type, and get count
     officer_year_comptype_grp = df_officer.groupby(
-        by=['year_received', 'fado_type'],).size()
+        by=['year_received', 'fado_type', 'allegation'],).size()
     # get dataframe from groupby object
     officer_year_comptype_grp = officer_year_comptype_grp.reset_index()
     # Change name of size(count) column to #_complaints
     officer_year_comptype_grp.rename(columns={0: '#_complaints'}, inplace=True)
     # Create table with the data and return figure
     fig = go.Figure(data=[go.Table(
-        header=dict(values=['Year', 'Complaint Type', "No. Complaints"],
+        header=dict(values=['Year', 'Complaint Type', "Allegation", "No. Complaints"],
                     align='left'),
         cells=dict(values=[officer_year_comptype_grp.year_received, officer_year_comptype_grp.fado_type,
-                           officer_year_comptype_grp['#_complaints']],
+                           officer_year_comptype_grp.allegation,  officer_year_comptype_grp['#_complaints']],
                    fill_color='lavender',
-                   align='left'),
-        columnwidth=[2, 4, 2]
+                   align=['left', 'center'], height=45),
+        columnwidth=[1, 4, 5, 2]
     )
     ])
-    fig.layout = general_layout
-    fig.update_layout(width=350)
+    margins = {'l': 10, 'r': 10, 't': 20, 'b': 20}
+    table_layout = general_layout
+    table_layout.margin = margins
+    fig.layout = table_layout
+    # fig.layout.margins = margins
+    fig.update_layout(width=465)
     return fig
 
 
@@ -572,8 +573,7 @@ def update_figure(categories, filter, ethnicities, genders):
                                 labels=labels, hover_data=hover_data, opacity=0.6,
                                 animation_frame='year_received', animation_group='complainant_gender', zoom=9)
 
-    fig.update_layout(mapbox_style="light",
-                      mapbox_accesstoken=mapbox_key)
+    fig.update_layout(mapbox_style="carto-positron")
     fig.layout.template = 'seaborn'
     fig.layout.paper_bgcolor = 'rgb(246, 246, 244)'
     margins = {'l': 10, 'r': 10, 't': 20, 'b': 0}
