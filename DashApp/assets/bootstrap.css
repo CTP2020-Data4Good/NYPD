@@ -16,15 +16,18 @@
 .drop-down-menus {
   cursor: pointer;
   background-color: rgb(202, 210, 211);
-  /* box-shadow: 0 0 0 0.2rem rgba(24, 188, 156, 0.25); */
 }
 
 .drop-down-element {
   background-color: rgb(246, 246, 244);
 }
+
+#page-content {
+  display: flex;
+  justify-content: center;
+}
 /* style home layout */
 #home_layout {
-  /* height: 300px; */
   margin-top: 30px;
   align-items: center;
   display: block;
@@ -32,13 +35,14 @@
 }
 
 #map-input-container {
-  padding: 20px;
+  padding: 10px;
 }
 
 .input-element {
-  margin: 6px;
   padding-top: 10px;
-  padding-bottom: 10x;
+  padding-bottom: 10px;
+  padding-right: 15px;
+  padding-left: 15px;
 }
 
 #boro-selection,
@@ -58,11 +62,10 @@
   background-color: #ecf0f1;
   opacity: 1;
 }
-#graphs-filter,
-#bar_graph_selector {
-  padding-left: 5px;
-}
 
+.vis-row {
+  margin-bottom: 8px;
+}
 #bar_graph_selector {
   padding-top: 5px;
 }
@@ -73,17 +76,6 @@
   box-shadow: 0 0 0 0.2rem rgba(95, 99, 98, 0.25);
   margin: 5px;
   border-radius: 5px;
-}
-
-#this-brand {
-  display: inline-block;
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-  padding-left: 1in;
-  margin-right: 1rem;
-  font-size: 3 em;
-  line-height: inherit;
-  white-space: nowrap;
 }
 
 .display-3 {
@@ -114,6 +106,10 @@
 }
 #officer_figs_container {
   display: none;
+}
+
+#about {
+  margin-right: 15px;
 }
 /* End OUR OWN STYLING CHANGES*/
 
@@ -742,8 +738,8 @@ pre code {
   display: flex;
   -ms-flex-wrap: wrap;
   flex-wrap: wrap;
-  margin-right: -15px;
-  margin-left: -15px;
+  margin-right: 15px;
+  margin-left: 15px;
 }
 
 .no-gutters {
@@ -4622,6 +4618,7 @@ input[type="button"].btn-block {
   display: block;
   padding-top: 1.3rem;
   font-size: 1.4rem;
+  margin-left: 20px;
 }
 
 .nav-link:hover,

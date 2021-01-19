@@ -33,7 +33,10 @@ df_full = df_full[df_full.year_received < 2020]
 df_full.drop_duplicates(inplace=True)
 df_unique_complaints = df_full.drop_duplicates(
     subset='complaint_id', inplace=False)
-
+# There are two versions of Staten Island, one with a space at the end.
+# Stream line Staten Island entries
+condition = df_full['borough'] != 'Staten Island '
+df_full['borough'].where(condition, 'Staten Island', inplace=True)
 # Data for later reference
 precincts = list(df_unique_complaints.precinct.unique())
 
@@ -49,37 +52,42 @@ legend_details = {'orientation': 'h',
 general_layout = go.Layout(template='seaborn', plot_bgcolor='rgba(0,0,0,0)',
                            margin=margins, paper_bgcolor='rgb(246, 246, 244)', legend=legend_details)
 
-layout = html.Div([
-    dbc.Row([dbc.Col(
-            dcc.Graph(id='animated_annual_map'),
-            width={'size': 7, 'offset': 1},
-            className='object-container'),
+layout = html.Div(style={'margin': 'auto', 'width': '95%'}, children=[
+    # Row with map and map options menu
+    dbc.Row([
+        # Map column
         dbc.Col(
-        dbc.FormGroup(
-            [dbc.Row(
-                dbc.Col(
-                    html.Div(
-                        # Select Borough Menu
-                        [dbc.Select(
-                            options=[
-                                {"label": "Types of complaints",
-                                 "value": 'complaint_types'},
-                                {"label": "Complainant Ethnicity",
-                                    "value": 'ethnicity'},
-                                {"label": "Complainant Gender", "value": "gender"},
-                            ],
-                            placeholder="Select visualizations...",
-                            id="map-filter",
-                            className='form-control',
-                            value='complaint_types'
+            dcc.Graph(id='animated_annual_map'),
+            className='object-container',  lg=7, xl=8),
 
-                        )],
-                        className='input-element select'
-                    ),
+        # End Map Column
+        # Map option menu
+        dbc.Col(
+            children=[html.H4("Map Options", className='input-element'),
+                      dbc.FormGroup(
+                [html.Div(
+                    # Select Borough Menu
+                    [dbc.Select(
+                        options=[
+                            {"label": "Types of complaints",
+                             "value": 'complaint_types'},
+                            {"label": "Complainant Ethnicity",
+                             "value": 'ethnicity'},
+                            {"label": "Complainant Gender",
+                             "value": "gender"},
+                        ],
+                        placeholder="Select visualizations...",
+                        id="map-filter",
+                        className='form-control',
+                        value='complaint_types'
+
+                    )],
+                    className='input-element select'
                 ),
-            ),
-                # dbc.Label("Choose a bunch"),
-                dbc.Checklist(
+
+
+                    # dbc.Label("Choose a bunch"),
+                    dbc.Checklist(
                     options=[
                         {'label': 'Abuse of Authority Complaints',
                          'value': 'Abuse of Authority'},
@@ -95,8 +103,8 @@ layout = html.Div([
                     id="map-input",
                     switch=True,
                     className='input-element'
-            ),
-                dbc.Checklist(
+                ),
+                    dbc.Checklist(
                     options=[
                         {'label': 'Black',
                          'value': 'Black'},
@@ -113,8 +121,8 @@ layout = html.Div([
                     switch=True,
                     inline=True,
                     className='input-element'
-            ),
-                dbc.Checklist(
+                ),
+                    dbc.Checklist(
                     options=[
                         {'label': 'Male',
                          'value': 'Male'},
@@ -134,25 +142,29 @@ layout = html.Div([
                     switch=True,
                     inline=True,
                     className='input-element'
-            ),
-            ]
-        ),
-        id='map-input-container',
-        width={'size': 3},
-        className='object-container',
-    )
-    ]),
+                ),
+                ]
+            ), ],
+            id='map-input-container',
+            # width={'size': 3},
+            lg=3,
+            className='object-container',
+        )
+        # End Map
+    ], className='vis-row'),
     dbc.Row([
         dbc.Col(
             # Graphs chosen
             dcc.Graph(id='user_selected_bar_graph'),
-            width={'size': 6, 'offset': 1},
+            # width={'size': 6, 'offset': 1},
+            lg=6,
             className='object-container'
         ),
         dbc.Col([
             # Select year for visualizations
+            dbc.Row(html.H4("Graph Options", className='input-element')),
             dbc.Row(
-                dbc.Col(
+                [dbc.Col(
                     dbc.FormGroup(
                         [
                             html.Div(
@@ -165,7 +177,7 @@ layout = html.Div([
                             )
                         ]
                     ),
-                )
+                )]
 
             ),
             dbc.Row(
@@ -192,7 +204,6 @@ layout = html.Div([
                             ),
                         ],
                     )
-                    # width={'size': 2, 'offset': 1}
                 )
 
             ),
@@ -260,88 +271,78 @@ layout = html.Div([
             ),
 
         ],
-            width={'size': 4},
+            # width={'size': 4},
+            lg=4, xl=5,
             className='object-container'
         ),
-    ]
+    ], className='vis-row',
     ),
-
-    html.Br(),
-    dbc.Col(id='officer_info_input_div', children=[
-        dbc.Row([
+    dbc.Row(children=[
+        dbc.Col(lg=10, xl=11, className='object-container', children=[
             # Officer Info input
-            dbc.Col(
-                dbc.Form([
-                    dbc.FormGroup([
-                        dbc.Col([dbc.Input(placeholder='Officer First Name', id='officer_fn',
-                                           value=None, type='text', className='input-element',),
-                                 dbc.Input(placeholder='Officer Last Name', id='officer_ln',
-                                           value=None, type='text', className='input-element',),
-                                 dbc.FormFeedback(
-                                     "Officer not found in database. ", valid=False),
-                                 dbc.FormFeedback("Officer found.", valid=True)
-                                 ], width={'size': 12}),
+            dbc.Row(children=[
+                dbc.Col(
+                    children=[html.H4("Search data for a specific officer: "),
+                              dbc.Form([
+                                  dbc.FormGroup([
+                                      dbc.Input(placeholder='Officer First Name', id='officer_fn',
+                                                value=None, type='text', className='input-element mr-2',),
+                                      dbc.Input(placeholder='Officer Last Name', id='officer_ln',
+                                                value=None, type='text', className='input-element mr-2',),
+                                      dbc.FormFeedback(
+                                          "Officer not found in database. ", valid=False),
+                                      dbc.FormFeedback(
+                                          "Officer found.", valid=True),
+                                      dbc.Button('Search', id='officer-search',
+                                                 n_clicks=0, className='input-element btn btn-primary ', color='primary'), ],
+                                      inline=True
+                                  ),
+                              ],
+                        inline=True,
+                    ), ],
+                    lg=6
+                ),
+                dbc.Col(
+                    dbc.FormGroup(
+                        [
+                            dbc.RadioItems(
+                                options=[
+                                    {'label': 'Complaint Types by Year',
+                                     'value': 'complaint_types_annual'},
+                                    {"label": 'Complainant Ethnicities by Year',
+                                     "value": 'ethnicities_annual'},
+                                    {"label": "Ethnicities of Complainants Overall",
+                                     "value": 'ethnicities'},
+                                    {"label": "Civilian Complaint Review Board Rulings by Complainant Ethnicity",
+                                     "value": 'ccrb'},
+                                ],
+                                value='complaint_types_annual',
+                                id="officer-graphs-filter",
+                                inline=True,
+                                className='input-element',
 
-                    ],
+                            ),
+                        ],
                     ),
-                    dbc.Col(html.Button('Search', id='officer-search',
-                                        n_clicks=0, className='input-element btn btn-primary'), width=2)],
-                    inline=True
-                ),
-                width=6
-            ),
-            dbc.Col(
-                dbc.FormGroup(
-                    [
-                        dbc.RadioItems(
-                            options=[
-                                {'label': 'Complaint Types by Year',
-                                 'value': 'complaint_types_annual'},
-                                {"label": 'Complainant Ethnicities by Year',
-                                 "value": 'ethnicities_annual'},
-                                {"label": "Ethnicities of Complainants Overall",
-                                 "value": 'ethnicities'},
-                                {"label": "Civilian Complaint Review Board Rulings by Complainant Ethnicity",
-                                 "value": 'ccrb'},
-                            ],
-                            value='complaint_types_annual',
-                            id="officer-graphs-filter",
-                            inline=True,
-                            className='input-element',
-
-                        ),
-                    ],
-                ),
-                width=6
-
-            )
-        ]
-
+                    lg=6
+                )
+            ]),
+        ]), ], className='vis-row'
+    ),
+    dbc.Row(id='officer_figs_container', children=[
+        dbc.Col(
+            dcc.Graph(id='officer_data_table'),
+            width={'size': 11, 'order': 'last'},
+            className='object-container',
         ),
-        dbc.Row()
+        dbc.Col(
+            dcc.Graph(id='officer_data_graph'),
+            width={'size': 11, },
+            className='object-container'
+        )
     ],
-        className='object-container',
-        width={'size': 10, 'offset': 1}),
-    html.Div(id='officer_figs_container',
-             children=[
-                 dbc.Row([
+    )
 
-                     dbc.Col(
-                         dcc.Graph(id='officer_data_table'),
-                         width={'size': 4, 'offset': 1},
-                         className='object-container'
-                     ),
-                     dbc.Col(
-                         dcc.Graph(id='officer_data_graph'),
-                         width={'size': 6},
-                         className='object-container'
-                     )
-                 ],
-
-                 )
-             ]
-
-             )
 
 
 ]
@@ -573,16 +574,14 @@ def update_figure(categories, filter, ethnicities, genders):
                                 labels=labels, hover_data=hover_data, opacity=0.6,
                                 animation_frame='year_received', animation_group='complainant_gender', zoom=9)
 
-    fig.update_layout(mapbox_style="carto-positron")
-    fig.layout.template = 'seaborn'
-    fig.layout.paper_bgcolor = 'rgb(246, 246, 244)'
+    # fig.layout.template = 'seaborn'
+    # fig.layout.paper_bgcolor = 'rgb(246, 246, 244)'
     margins = {'l': 10, 'r': 10, 't': 20, 'b': 0}
     legend_title = {'text': ''}
-    fig.update_layout(margin=margins)
     legend_details = {'orientation': 'h',  'x': 0.4,
                       'bgcolor': 'rgb(246, 246, 244)', 'title': legend_title}
-    fig.update_layout(legend=legend_details)
-
+    fig.update_layout(mapbox_style="carto-positron",
+                      template='seaborn', paper_bgcolor='rgb(246, 246, 244)', margin=margins, legend=legend_details)
     return fig
 
 # Callback for complaint type numbers by year bar graph

@@ -13,29 +13,16 @@ from app import server
 from apps import annual, about
 
 
-app.layout = html.Div([
-    html.Div([
-        html.Nav(className='navbar navbar-expand-lg navbar-dark bg-primary', id='navbarColor01',
-                 children=[html.A('NYPD Complaints Navigator',
-                                  className='navbar-brand', id='navbar-brand', href='index'),
-                           html.Div(className='collapse navbar-collapse',
-                                    children=[
-                                        html.Ul(className='navbar-nav mr-auto',
-                                                children=[
-                                                    html.Li(dcc.Link(
-                                                        'About', className='nav-link', href='/apps/about', ), className='nav-item')
-                                                ]
-
-                                                )
-                                    ])]
-                 ),
-    ],),
-    # When link is clicked, the href value populates pathname param here
-    dcc.Location(id='url', refresh=False, pathname=''),
-    # App pages will be returned to go inside that list
-    html.Div(id='page-content', children=[]),
-    html.Br(),
-])
+app.layout = html.Div(id='nav',
+                      children=[dbc.NavbarSimple(className='navbar navbar-expand-lg navbar-dark bg-primary', id='navbarColor01', children=[
+                          dbc.NavItem(dbc.NavLink(
+                              'About', className='nav-item', id='about', href='/apps/about', ), className='nav-item'), ], color="primary", dark=True, brand="NYPD Complaints Navigator", brand_href='index',
+                      ),
+                          # When link is clicked, the href value populates pathname param here
+                          dcc.Location(id='url', refresh=False, pathname=''),
+                          # App pages will be returned to be rendered int his div
+                          html.Div(id='page-content', children=[]),
+                      ])
 
 home_layout = html.Div(id='home_layout', className="jumpotron",
                        children=[

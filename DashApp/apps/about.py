@@ -1,3 +1,4 @@
+from dash_bootstrap_components._components.CardBody import CardBody
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
@@ -21,110 +22,106 @@ PAGE_SIZE = 27
 layout = html.Div([
     html.Div(className="jumbotron",
              children=[
-                 html.H3("Visualizing and Understanding NYPD Misconduct Data",
+                 html.H1("Visualizing and Understanding NYPD Misconduct Data",
                          className="display-3"),
                  html.Hr(className="my-4"),
 
                  dbc.Row([
-                     # projext description
-                     dbc.Col([
-                         html.Div(className="card text-white bg-primary mb-6", style={"max-width": "60rem"},
+                     # project description
+                     dbc.CardDeck([
+                         dbc.Card(className="card text-white bg-primary mb-6", style={"max-width": "60rem"},
                                   children=[
-                             html.Div("What is NYPD Complaint Navigator?",
-                                      className="card-header"),
-                             html.Div(className="card-body",
-                                      children=[
-                                          html.P("Due to an upsurge in advocacy against police misconduct and for transparency, in the summer of 2020 New York State repealed laws  which had for years denied the public access to NYPD disciplinary records. The reform resulted in the release of a database featuring 12,000 civilian complaints of police misconduct, including tens of thousands of allegations. NYPD Complaint Navigator is a data visualization \"dashboard\" application, that enables users to filter and analyze this newly available data. This application is intended as a tool for community members, activists, and policy makers to facilitate the understanding and exploration of this data. We hope that this tool can be especially useful to communities impacted by police misconduct.", className="card-text"),
-                                          html.Br(),
-                                          html.P(["NYPD Complaint Navigator is a student project developed by Computer Science Students at the City University of New York. To view the code for this project or contribute to improving it, visit the project ", html.A(
-                                              "github", href="https://github.com/CTP2020-Data4Good/NYPD"), " page."]),
-
-                                      ]
-                                      ),
-                         ],
-                         ),
-                     ], width=5),
-
-                     # why
-                     dbc.Col([
-                         html.Div(className="card text-white bg-primary mb-6", style={"max-width": "60rem"},
-                                  children=[
-                             html.Div("About the Data",
-                                      className="card-header"),
-                             html.Div(className="card-body",
-                                      children=[
-                                          html.P(
-                                              ["The data used in this application is downloaded from ProPublica's", html.A(" Data Store", href="https://www.propublica.org/datastore/dataset/civilian-complaints-against-new-york-city-police-officers"), ". The data features:"], className="card-text"),
-                                          html.Ul([
-                                              html.Li("12,000 unique complaints filed against 4,000 active duty officers, and over 30,000 distinct allegations."
-                                                      ),
-                                              html.Li(
-                                                  "Civilian complaints dating back to 1985."
-                                              ),
-                                              html.Li(
-                                                  "Demographic information associated with each allegation, including complainant and officer ethnicity and gender, precincts associated with each complaint, and Civilian Review Board outcome."
-                                              )]
-                                          ),
-                                          html.P(
-                                              "These details are used to create the visualizations provided here. Users of this application can search for a specific officer and view a summary and visualizations based on data from allegation made against the given officer. More details about the data can be found at the project github page and at ProPublica's website. ",
+                             dbc.CardBody(children=[
+                                 html.H3("What is NYPD Complaint Navigator?",
+                                          className="card-header"),
+                                 html.Div(className="card-body",
+                                          children=[
+                                              html.P("Due to an upsurge in advocacy against police misconduct and for transparency, in the summer of 2020 New York State repealed laws  which had for years denied the public access to NYPD disciplinary records. The reform resulted in the release of a database featuring 12,000 civilian complaints of police misconduct, including tens of thousands of allegations. NYPD Complaint Navigator is a data visualization \"dashboard\" application, that enables users to filter and analyze this newly available data. This application is intended as a tool for community members, activists, and policy makers to facilitate the understanding and exploration of this data. We hope that this tool can be especially useful to communities impacted by police misconduct.", className="card-text"),
+                                              html.P(["NYPD Complaint Navigator is a student project developed by Computer Science Students at the City University of New York as part of the", html.A(' CUNY Tech Prep Program', href="https://cunytechprep.nyc/"), ". To view the code for this project or contribute to improving it, visit the project ", html.A(
+                                                  "github", href="https://github.com/CTP2020-Data4Good/NYPD"), " page."]),
+                                          ]
                                           ),
 
-                                      ]
-                                      ),
+                             ]),
+
                          ],
                          ),
-                     ], width=5),
+                         dbc.Card(className="card text-white bg-primary mb-6", style={"max-width": "60rem"},
+                                  children=[dbc.CardBody([
+                                      html.H3("About the Data",
+                                              className="card-header"),
+                                      html.Div(className="card-body",
+                                               children=[
+                                                   html.P(
+                                                       ["The data used in this application is downloaded from ProPublica's", html.A(" Data Store", href="https://www.propublica.org/datastore/dataset/civilian-complaints-against-new-york-city-police-officers"), ". The data features:"], className="card-text"),
+                                                   html.Ul([
+                                                       html.Li("12,000 unique complaints filed against 4,000 active duty officers, and over 30,000 distinct allegations."
+                                                               ),
+                                                       html.Li(
+                                                           "Civilian complaints dating back to 1985."
+                                                       ),
+                                                       html.Li(
+                                                           "Demographic information associated with each allegation, including complainant and officer ethnicity and gender, precincts associated with each complaint, and Civilian Review Board outcome."
+                                                       )]
+                                                   ),
+                                                   html.P(
+                                                       "These details are used to create the visualizations provided here. Users of this application can search for a specific officer and view a summary and visualizations based on data from allegation made against the given officer. More details about the data can be found at the project github page and at ProPublica's website. ",
+                                                   ),
+
+                                               ]
+                                               ),
+                                  ]), ],
+                                  ),
+                     ],),
                  ], justify="center"),
 
                  html.Br(id="space-in-between"),
 
                  dbc.Row([
                      # data
-                     dbc.Col([
-                         html.Div(className="card text-white bg-primary mb-6", style={"max-width": "150rem"},
-                                  children=[
-                             html.Div("The Data", className="card-header"),
-                             html.Div(className="card-body",
-                                      children=[
-                                          dash_table.DataTable(
-                                              id='table-sorting-filtering',
-                                              columns=[
-                                                  {'name': i, 'id': i, 'deletable': True} for i in sorted(df.columns)
-                                              ],
-                                              page_current=0,
-                                              page_size=PAGE_SIZE,
-                                              page_action='custom',
+                         dbc.Card(className="card text-white bg-primary mb-6", style={"max-width": "124rem"},
+                                  children=[dbc.CardBody([
+                                      html.Div(
+                                          "The Data", className="card-header"),
+                                      html.Div(className="card-body",
+                                               children=[
+                                                   dash_table.DataTable(
+                                                       id='table-sorting-filtering',
+                                                       columns=[
+                                                           {'name': i, 'id': i, 'deletable': True} for i in sorted(df.columns)
+                                                       ],
+                                                       page_current=0,
+                                                       page_size=PAGE_SIZE,
+                                                       page_action='custom',
 
-                                              filter_action='custom',
-                                              filter_query='',
+                                                       filter_action='custom',
+                                                       filter_query='',
 
-                                              sort_action='custom',
-                                              sort_mode='multi',
-                                              sort_by=[],
-                                              style_table={
-                                                  'overflowX': 'auto', 'height': '450px', 'overflowY': 'auto'},
-                                              style_header={
-                                                  'backgroundColor': 'rgb(230, 230, 230)',
-                                                  'fontWeight': 'bold'
-                                              },
-                                              style_cell={
-                                                  'color': '#2C3F50',
-                                                  'font-family': 'sans-serif'
-                                              }
-                                          ),
-                                      ],
-                                      ),
-                         ],
-                         ),
-                     ], width={"size": 10, "offset": 1},),
-                 ]),
+                                                       sort_action='custom',
+                                                       sort_mode='multi',
+                                                       sort_by=[],
+                                                       style_table={
+                                                           'overflowX': 'auto', 'height': '450px', 'overflowY': 'auto'},
+                                                       style_header={
+                                                           'backgroundColor': 'rgb(230, 230, 230)',
+                                                           'fontWeight': 'bold'
+                                                       },
+                                                       style_cell={
+                                                           'color': '#2C3F50',
+                                                           'font-family': 'sans-serif'
+                                                       }
+                                                   ),
+                                               ],
+                                               ),
+                                  ]), ],
+                                  ), ]),
 
                  html.Br(id="space-in-between"),
 
-             ], style={"marginTop": 0, "marginBottom": 0, "fontSize": 15, },
+             ],
              #  "font-weight": "lighter"
              ),
-])
+], style={'margin': 'auto', 'width': '90%'},)
 
 # for officer
 operators = [['ge ', '>='],
